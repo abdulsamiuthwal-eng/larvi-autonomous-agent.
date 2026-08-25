@@ -162,82 +162,56 @@ class LarviContext {
     const pfCalStatus = document.getElementById('pf-cal-status');
     const pfTokenStatus = document.getElementById('pf-token-status');
 
-    if (authData.authenticated) {
-      const email = authData.email || 'user@gmail.com';
-      const name = authData.name || email.split('@')[0];
-      const initial = (name || email)[0].toUpperCase();
+    // ── Check Custom Local Profile & Custom Avatar ─────────────
+    let customAvatar = localStorage.getItem('larvi_custom_avatar') || null;
+    let customProfile = null;
+    try {
+      customProfile = JSON.parse(localStorage.getItem('larvi_custom_profile') || 'null');
+    } catch { customProfile = null; }
 
-      // Sidebar Profile Strip
-      if (userNameEl) userNameEl.textContent = name;
-      if (userEmailEl) userEmailEl.textContent = email;
-      if (upStatusDot) {
-        upStatusDot.className = 'up-status-dot online';
-      }
+    const effectiveEmail = (customProfile && customProfile.email) || authData.email || (authData.authenticated ? 'user@gmail.com' : 'Not connected');
+    const effectiveName = (customProfile && customProfile.name) || authData.name || (effectiveEmail !== 'Not connected' ? effectiveEmail.split('@')[0] : 'Larvi User');
+    const initial = (effectiveName || 'U')[0].toUpperCase();
+    const effectivePicture = customAvatar || authData.picture || null;
 
-      if (authData.picture && userPicEl) {
-        userPicEl.src = authData.picture;
-        userPicEl.style.display = 'block';
-        if (userAvatarEl) userAvatarEl.style.display = 'none';
-      } else if (userAvatarEl) {
-        userAvatarEl.textContent = initial;
-        userAvatarEl.style.display = 'flex';
-        if (userPicEl) userPicEl.style.display = 'none';
-      }
-
-      // Profile Page View
-      if (heroName) heroName.textContent = name;
-      if (heroEmail) heroEmail.textContent = email;
-      if (heroAvatarStatus) {
-        heroAvatarStatus.textContent = '● Online & Connected';
-        heroAvatarStatus.className = 'profile-avatar-status online';
-      }
-
-      if (authData.picture && heroPicLarge) {
-        heroPicLarge.src = authData.picture;
-        heroPicLarge.style.display = 'block';
-        if (heroInitialLarge) heroInitialLarge.style.display = 'none';
-      } else if (heroInitialLarge) {
-        heroInitialLarge.textContent = initial;
-        heroInitialLarge.style.display = 'flex';
-        if (heroPicLarge) heroPicLarge.style.display = 'none';
-      }
-
-      if (pfName) pfName.textContent = name;
-      if (pfEmail) pfEmail.textContent = email;
-      if (pfGmailStatus) pfGmailStatus.innerHTML = '<span class="status-chip connected">Active & Linked</span>';
-      if (pfCalStatus) pfCalStatus.innerHTML = '<span class="status-chip connected">Active & Linked</span>';
-      if (pfTokenStatus) pfTokenStatus.innerHTML = '<span class="status-chip connected">Valid & Refreshing</span>';
-
-    } else {
-      // Sidebar Profile Strip (Offline)
-      if (userNameEl) userNameEl.textContent = 'Larvi User';
-      if (userEmailEl) userEmailEl.textContent = 'Not connected';
-      if (upStatusDot) upStatusDot.className = 'up-status-dot offline';
-      if (userAvatarEl) {
-        userAvatarEl.textContent = 'U';
-        userAvatarEl.style.display = 'flex';
-      }
-      if (userPicEl) userPicEl.style.display = 'none';
-
-      // Profile Page View (Offline)
-      if (heroName) heroName.textContent = 'Larvi User';
-      if (heroEmail) heroEmail.textContent = 'Not connected';
-      if (heroAvatarStatus) {
-        heroAvatarStatus.textContent = '● Offline (Not Connected)';
-        heroAvatarStatus.className = 'profile-avatar-status';
-      }
-      if (heroInitialLarge) {
-        heroInitialLarge.textContent = 'U';
-        heroInitialLarge.style.display = 'flex';
-      }
-      if (heroPicLarge) heroPicLarge.style.display = 'none';
-
-      if (pfName) pfName.textContent = '—';
-      if (pfEmail) pfEmail.textContent = '—';
-      if (pfGmailStatus) pfGmailStatus.innerHTML = '<span class="status-chip disconnected">Disconnected</span>';
-      if (pfCalStatus) pfCalStatus.innerHTML = '<span class="status-chip disconnected">Disconnected</span>';
-      if (pfTokenStatus) pfTokenStatus.innerHTML = '<span class="status-chip disconnected">Not issued</span>';
+    // Sidebar Profile Strip
+    if (userNameEl) userNameEl.textContent = effectiveName;
+    if (userEmailEl) userEmailEl.textContent = effectiveEmail;
+    if (upStatusDot) {
+      upStatusDot.className = authData.authenticated ? 'up-status-dot online' : 'up-status-dot offline';
     }
+
+    if (effectivePicture && userPicEl) {
+      userPicEl.src = effectivePicture;
+      userPicEl.style.display = 'block';
+      if (userAvatarEl) userAvatarEl.style.display = 'none';
+    } else if (userAvatarEl) {
+      userAvatarEl.textContent = initial;
+      userAvatarEl.style.display = 'flex';
+      if (userPicEl) userPicEl.style.display = 'none';
+    }
+
+    // Profile Page View
+    if (heroName) heroName.textContent = effectiveName;
+    if (heroEmail) heroEmail.textContent = effectiveEmail;
+
+    if (effectivePicture && heroPicLarge) {
+      heroPicLarge.src = effectivePicture;
+      heroPicLarge.style.display = 'block';
+      if (heroInitialLarge) heroInitialLarge.style.display = 'none';
+    } else if (heroInitialLarge) {
+      heroInitialLarge.textContent = initial;
+      heroInitialLarge.style.display = 'flex';
+      if (heroPicLarge) heroPicLarge.style.display = 'none';
+    }
+
+    // Populate inputs if form fields exist
+    const inputName = document.getElementById('profile-input-name');
+    const inputEmail = document.getElementById('profile-input-email');
+    const inputRole = document.getElementById('profile-input-role');
+    if (inputName && !inputName.value) inputName.value = effectiveName !== 'Larvi User' ? effectiveName : '';
+    if (inputEmail && !inputEmail.value) inputEmail.value = effectiveEmail !== 'Not connected' ? effectiveEmail : '';
+    if (inputRole && customProfile && customProfile.role) inputRole.value = customProfile.role;
   }
 }
 

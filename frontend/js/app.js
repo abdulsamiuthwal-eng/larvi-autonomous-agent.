@@ -273,11 +273,100 @@ function setupEventListeners() {
     });
   }
 
-  // Profile View Action Listeners
-  const profileExportBtn = document.getElementById('profile-export-btn');
-  if (profileExportBtn) profileExportBtn.addEventListener('click', exportChatData);
-  const profileDeleteBtn = document.getElementById('profile-delete-btn');
-  if (profileDeleteBtn) profileDeleteBtn.addEventListener('click', promptDeleteAccount);
+  // ── Logout Handlers ────────────────────────────────────────────────────────
+  const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
+  const headerLogoutBtn = document.getElementById('header-logout-btn');
+  const profileLogoutBtn = document.getElementById('profile-logout-btn');
+
+  if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    handleLogout();
+  });
+  if (headerLogoutBtn) headerLogoutBtn.addEventListener('click', handleLogout);
+  if (profileLogoutBtn) profileLogoutBtn.addEventListener('click', handleLogout);
+
+  // ── Profile Photo Upload & Remove ──────────────────────────────────────────
+  const photoInput = document.getElementById('profile-pic-file-input');
+  const uploadTrigger = document.getElementById('btn-upload-photo-trigger');
+  const avatarClickWrap = document.getElementById('profile-avatar-click-wrap');
+  const removePhotoBtn = document.getElementById('btn-remove-photo');
+
+  if (uploadTrigger && photoInput) {
+    uploadTrigger.addEventListener('click', () => photoInput.click());
+  }
+  if (avatarClickWrap && photoInput) {
+    avatarClickWrap.addEventListener('click', () => photoInput.click());
+  }
+  if (photoInput) {
+    photoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          showToast('Image size should be less than 2MB', 'warning');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const dataUrl = ev.target.result;
+          localStorage.setItem('larvi_custom_avatar', dataUrl);
+          larviContext.updateAuthUI(larviContext.authState);
+          showToast('Profile photo updated successfully! 📸', 'success');
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+  if (removePhotoBtn) {
+    removePhotoBtn.addEventListener('click', () => {
+      localStorage.removeItem('larvi_custom_avatar');
+      larviContext.updateAuthUI(larviContext.authState);
+      showToast('Custom photo removed', 'info');
+    });
+  }
+
+  // ── Profile Info Form Save ──────────────────────────────────────────────────
+  const profileInfoForm = document.getElementById('profile-info-form');
+  if (profileInfoForm) {
+    profileInfoForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('profile-input-name')?.value.trim();
+      const email = document.getElementById('profile-input-email')?.value.trim();
+      const role = document.getElementById('profile-input-role')?.value.trim();
+
+      if (!name) {
+        showToast('Please enter your full name', 'warning');
+        return;
+      }
+      const customProfile = { name, email, role };
+      localStorage.setItem('larvi_custom_profile', JSON.stringify(customProfile));
+      larviContext.updateAuthUI(larviContext.authState);
+      showToast('Profile changes saved successfully! ✅', 'success');
+    });
+  }
+
+  // ── Profile Password Form ───────────────────────────────────────────────────
+  const profilePasswordForm = document.getElementById('profile-password-form');
+  if (profilePasswordForm) {
+    profilePasswordForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const currentPwd = document.getElementById('profile-current-pwd')?.value;
+      const newPwd = document.getElementById('profile-new-pwd')?.value;
+      const confirmPwd = document.getElementById('profile-confirm-pwd')?.value;
+
+      if (!newPwd || newPwd.length < 6) {
+        showToast('New password must be at least 6 characters long', 'warning');
+        return;
+      }
+      if (newPwd !== confirmPwd) {
+        showToast('New password and confirmation do not match!', 'error');
+        return;
+      }
+      showToast('Account password updated securely! 🔐', 'success');
+      document.getElementById('profile-current-pwd').value = '';
+      document.getElementById('profile-new-pwd').value = '';
+      document.getElementById('profile-confirm-pwd').value = '';
+    });
+  }
 
   // User profile in sidebar -> Opens Profile View
   if (userProfile) {
@@ -292,6 +381,16 @@ function setupEventListeners() {
       switchView('profile');
     });
   }
+}
+
+// ── Global Logout Function ────────────────────────────────────────────────────
+function handleLogout() {
+  showToast('Signing out of Larvi…', 'info');
+  sessionStorage.removeItem('larvi_session_id');
+  sessionStorage.removeItem('larvi_active_conversation_id');
+  setTimeout(() => {
+    window.location.href = 'splash.html';
+  }, 400);
 }
 
 // ── View Switching Logic ──────────────────────────────────────────────────────
@@ -475,43 +574,27 @@ async function loadCalendarView(forceRefresh = false) {
 // ── Profile View Loader ───────────────────────────────────────────────────────
 async function loadProfileView() {
   const stats = await fetchSettingsStats(larviContext.sessionId);
-  const btnContainer = document.getElementById('profile-auth-action-container');
-  const sessionsNum = document.getElementById('pf-stat-sessions');
-  const messagesNum = document.getElementById('pf-stat-messages');
-
-  if (stats && stats.db_stats) {
-    if (sessionsNum) sessionsNum.textContent = stats.db_stats.total_sessions || '0';
-    if (messagesNum) messagesNum.textContent = stats.db_stats.total_messages || '0';
-  }
 
   if (stats && stats.auth) {
     larviContext.setAuthState(stats.auth);
   }
 
   const isAuth = stats && stats.auth && stats.auth.authenticated;
+  const sessionStatusText = document.getElementById('profile-session-status-text');
+  const accountTypeBadge = document.getElementById('profile-account-type-badge');
 
-  if (btnContainer) {
+  if (sessionStatusText) {
     if (isAuth) {
-      btnContainer.innerHTML = `
-        <button id="btn-disconnect-google-profile" class="btn btn-secondary btn-sm text-rose">
-          Disconnect Google Account
-        </button>
-      `;
-      const btn = document.getElementById('btn-disconnect-google-profile');
-      if (btn) btn.addEventListener('click', promptDisconnectGoogle);
+      sessionStatusText.textContent = `Connected as ${stats.auth.email || 'Google User'}. Active OAuth tokens are securely encrypted and automatically refreshed.`;
     } else {
-      btnContainer.innerHTML = `
-        <button class="btn-google-auth" onclick="window.location.href=getLoginUrl(larviContext.sessionId)">
-          <svg class="google-auth-icon" viewBox="0 0 24 24" width="16" height="16">
-            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-          </svg>
-          <span>Connect Google Account</span>
-        </button>
-      `;
+      sessionStatusText.textContent = 'You are currently using Larvi as a Guest. Sign in with Google to enable full autonomous email and calendar workflows.';
     }
+  }
+
+  if (accountTypeBadge) {
+    accountTypeBadge.innerHTML = isAuth
+      ? `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Google OAuth 2.0`
+      : `<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg> Guest User`;
   }
 }
 

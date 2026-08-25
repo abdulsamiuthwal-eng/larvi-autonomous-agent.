@@ -279,19 +279,22 @@
   margin-top: 1px;
 }
 
-.up-chevron-btn {
+.up-chevron-btn,
+.up-action-btn {
   background: none;
   border: none;
-  padding: 4px;
+  padding: 5px;
   border-radius: 6px;
   color: var(--color-text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
-  transition: color 0.15s, background 0.15s;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s, transform 0.15s;
   flex-shrink: 0;
 }
 .up-chevron-btn:hover { color: var(--color-text-primary); background: var(--color-border-faint); }
+.up-action-btn:hover { color: #f43f5e; background: rgba(244,63,94,0.12); transform: scale(1.08); }
 
 /* ── Header Groups & Mobile Elements ────────────────────────────── */
 .header-left-group {

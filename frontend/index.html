@@ -190,6 +190,13 @@
         <div id="user-name-display" class="up-name truncate">Larvi User</div>
         <div id="user-email-display" class="up-email truncate">Not connected</div>
       </div>
+      <button id="sidebar-logout-btn" class="up-action-btn text-rose" title="Log Out / Sign Out" aria-label="Log out">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </button>
       <button id="user-profile-btn" class="up-chevron-btn" title="My Profile" aria-label="Open profile">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -246,6 +253,14 @@
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
           New Chat
+        </button>
+        <button id="header-logout-btn" class="btn btn-ghost btn-sm text-rose" title="Log Out">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+          Logout
         </button>
       </div>
     </header>
@@ -397,164 +412,152 @@
     </div>
 
     <!-- ═════════════════════════════════════════════════════════════
-         VIEW: PROFILE
+         VIEW: PROFILE (User Details, Photo Upload, Password & Logout)
          ═════════════════════════════════════════════════════════════ -->
     <div id="view-profile" class="app-view" style="display:none;">
       <div class="view-content-container profile-container">
+
+        <!-- Hidden Photo File Input -->
+        <input type="file" id="profile-pic-file-input" accept="image/*" style="display:none;">
 
         <!-- Profile Hero Card -->
         <div class="profile-hero-card">
           <div class="profile-hero-bg"></div>
           <div class="profile-hero-content">
             <div class="profile-avatar-section">
-              <div class="profile-avatar-large-wrap">
+              <div class="profile-avatar-large-wrap" id="profile-avatar-click-wrap" title="Click to upload new photo" style="cursor:pointer;">
                 <img id="profile-pic-large" src="" alt="" style="display:none;">
                 <div id="profile-initial-large" class="profile-initial-large">U</div>
                 <div class="profile-avatar-ring"></div>
+                <div class="profile-avatar-upload-overlay" title="Upload Photo">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </div>
               </div>
-              <div class="profile-avatar-status" id="profile-avatar-status">● Offline</div>
+              <div class="profile-photo-buttons">
+                <button type="button" id="btn-upload-photo-trigger" class="btn btn-secondary btn-sm" style="font-size:11px;padding:4px 10px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload Photo
+                </button>
+                <button type="button" id="btn-remove-photo" class="btn btn-ghost btn-sm text-rose" style="font-size:11px;padding:4px 8px;" title="Remove custom photo">
+                  Remove
+                </button>
+              </div>
             </div>
             <div class="profile-hero-info">
               <h2 id="profile-name-display" class="profile-hero-name">Larvi User</h2>
               <p id="profile-email-hero" class="profile-hero-email">Not connected</p>
               <div class="profile-hero-badges">
-                <span class="profile-badge google-badge-pill">
-                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.32 10.32H12v3.36h4.8c-.48 2.4-2.56 4.08-4.8 4.08A5.76 5.76 0 0 1 6.24 12 5.76 5.76 0 0 1 12 6.24c1.52 0 2.88.56 3.92 1.52l2.4-2.4A9.12 9.12 0 0 0 12 3a9 9 0 1 0 0 18 8.64 8.64 0 0 0 8.64-9 9.6 9.6 0 0 0-.32-1.68z"/></svg>
-                  Google Account
+                <span class="profile-badge google-badge-pill" id="profile-account-type-badge">
+                  <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Active Account
                 </span>
                 <span class="profile-badge ai-badge-pill">
                   <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/></svg>
-                  Larvi AI Agent
+                  Larvi AI Member
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Profile Info Grid -->
-        <div class="profile-info-grid">
+        <!-- Profile Forms Grid -->
+        <div class="profile-forms-grid">
 
-          <!-- Personal Info Card -->
-          <div class="profile-info-card">
+          <!-- Card 1: Edit Personal Details -->
+          <div class="profile-card">
             <div class="profile-card-header">
               <div class="profile-card-icon personal-icon">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               </div>
-              <span class="profile-card-title">Personal Information</span>
-            </div>
-            <div class="profile-card-body">
-              <div class="profile-field">
-                <label class="profile-field-label">Display Name</label>
-                <div class="profile-field-value" id="pf-name">—</div>
-              </div>
-              <div class="profile-field">
-                <label class="profile-field-label">Email Address</label>
-                <div class="profile-field-value" id="pf-email">—</div>
-              </div>
-              <div class="profile-field">
-                <label class="profile-field-label">Account Type</label>
-                <div class="profile-field-value">Google OAuth 2.0</div>
-              </div>
-              <div class="profile-field">
-                <label class="profile-field-label">Access Scopes</label>
-                <div class="profile-field-value">
-                  <span class="scope-mini-pill">Gmail</span>
-                  <span class="scope-mini-pill">Calendar</span>
-                  <span class="scope-mini-pill">Profile</span>
-                </div>
+              <div>
+                <div class="profile-card-title">Personal Profile Details</div>
+                <div class="profile-card-subtitle">Manage your name, email, and display identity</div>
               </div>
             </div>
+            <form id="profile-info-form" class="profile-card-body" onsubmit="return false;">
+              <div class="form-group">
+                <label class="form-label" for="profile-input-name">Full Display Name</label>
+                <input type="text" id="profile-input-name" class="form-input" placeholder="e.g. Abdul Sami" autocomplete="name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-input-email">Email Address</label>
+                <input type="email" id="profile-input-email" class="form-input" placeholder="e.g. abdul@gmail.com" autocomplete="email">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-input-role">Profession / Role</label>
+                <input type="text" id="profile-input-role" class="form-input" placeholder="e.g. Lead Developer / Student">
+              </div>
+              <div class="form-actions">
+                <button type="submit" id="btn-save-profile-info" class="btn btn-primary btn-sm">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  Save Profile Changes
+                </button>
+              </div>
+            </form>
           </div>
 
-          <!-- Connection Status Card -->
-          <div class="profile-info-card">
-            <div class="profile-card-header">
-              <div class="profile-card-icon connect-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-              </div>
-              <span class="profile-card-title">Connection Status</span>
-            </div>
-            <div class="profile-card-body">
-              <div class="profile-field">
-                <label class="profile-field-label">Gmail API</label>
-                <div class="profile-field-value" id="pf-gmail-status"><span class="status-chip disconnected">Disconnected</span></div>
-              </div>
-              <div class="profile-field">
-                <label class="profile-field-label">Google Calendar</label>
-                <div class="profile-field-value" id="pf-cal-status"><span class="status-chip disconnected">Disconnected</span></div>
-              </div>
-              <div class="profile-field">
-                <label class="profile-field-label">OAuth Token</label>
-                <div class="profile-field-value" id="pf-token-status"><span class="status-chip disconnected">Not issued</span></div>
-              </div>
-              <div class="profile-field" style="margin-top:10px;">
-                <div id="profile-auth-action-container">
-                  <!-- Populated by JS -->
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Usage Stats Card -->
-          <div class="profile-info-card">
-            <div class="profile-card-header">
-              <div class="profile-card-icon stats-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-              </div>
-              <span class="profile-card-title">Usage Statistics</span>
-            </div>
-            <div class="profile-card-body">
-              <div class="profile-stats-row">
-                <div class="profile-stat-box">
-                  <div class="profile-stat-num" id="pf-stat-sessions">0</div>
-                  <div class="profile-stat-lbl">Sessions</div>
-                </div>
-                <div class="profile-stat-box">
-                  <div class="profile-stat-num" id="pf-stat-messages">0</div>
-                  <div class="profile-stat-lbl">Messages</div>
-                </div>
-                <div class="profile-stat-box">
-                  <div class="profile-stat-num">SQLite</div>
-                  <div class="profile-stat-lbl">Storage</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Security Card -->
-          <div class="profile-info-card">
+          <!-- Card 2: Change Password -->
+          <div class="profile-card">
             <div class="profile-card-header">
               <div class="profile-card-icon security-icon">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               </div>
-              <span class="profile-card-title">Security & Privacy</span>
-            </div>
-            <div class="profile-card-body">
-              <div class="profile-field">
-                <label class="profile-field-label">Authentication</label>
-                <div class="profile-field-value">Google OAuth 2.0 (Secure)</div>
-              </div>
-              <div class="profile-field">
-                <label class="profile-field-label">Password Storage</label>
-                <div class="profile-field-value">Managed by Google — No password stored locally</div>
-              </div>
-              <div class="profile-field">
-                <label class="profile-field-label">Session Tokens</label>
-                <div class="profile-field-value">Encrypted, auto-refresh enabled</div>
-              </div>
-              <div class="profile-field" style="margin-top:12px;">
-                <button id="profile-export-btn" class="btn btn-secondary btn-sm" style="margin-right:8px;">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Export Data
-                </button>
-                <button id="profile-delete-btn" class="btn btn-danger-pill btn-sm" style="font-size:11px;padding:6px 14px;">
-                  Delete Account
-                </button>
+              <div>
+                <div class="profile-card-title">Change Account Password</div>
+                <div class="profile-card-subtitle">Update your password to keep your account safe</div>
               </div>
             </div>
+            <form id="profile-password-form" class="profile-card-body" onsubmit="return false;">
+              <div class="form-group">
+                <label class="form-label" for="profile-current-pwd">Current Password</label>
+                <input type="password" id="profile-current-pwd" class="form-input" placeholder="••••••••••••" autocomplete="current-password">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-new-pwd">New Password</label>
+                <input type="password" id="profile-new-pwd" class="form-input" placeholder="At least 8 characters" autocomplete="new-password">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="profile-confirm-pwd">Confirm New Password</label>
+                <input type="password" id="profile-confirm-pwd" class="form-input" placeholder="Repeat new password" autocomplete="new-password">
+              </div>
+              <div class="form-actions">
+                <button type="submit" id="btn-update-password" class="btn btn-primary btn-sm">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  Update Password
+                </button>
+              </div>
+            </form>
           </div>
 
-        </div><!-- /profile-info-grid -->
+        </div><!-- /profile-forms-grid -->
+
+        <!-- Card 3: Account Sign Out & Session Security -->
+        <div class="profile-card" style="margin-top:4px;">
+          <div class="profile-card-header">
+            <div class="profile-card-icon danger-zone-icon">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            </div>
+            <div>
+              <div class="profile-card-title">Session &amp; Account Control</div>
+              <div class="profile-card-subtitle">Sign out of active session or disconnect your profile</div>
+            </div>
+          </div>
+          <div class="profile-card-body profile-session-body">
+            <div class="profile-session-info">
+              <div class="profile-session-title">Active Session Authentication</div>
+              <div class="profile-session-desc" id="profile-session-status-text">
+                Signed in securely. You can log out anytime to clear local session tokens and close active access.
+              </div>
+            </div>
+            <div class="profile-session-actions">
+              <button type="button" id="profile-logout-btn" class="btn btn-danger-pill">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Log Out of Larvi
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div><!-- /view-profile -->
 
