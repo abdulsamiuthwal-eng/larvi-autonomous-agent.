@@ -1,7 +1,7 @@
 # 🚀 Larvi — Autonomous Email & Calendar AI Agent
 ### Complete Master Project Overview & Architecture Guide
 
-> **Purpose of this file:** Whenever you open a new AI chat or onboarding session, this document gives 100% complete context of the project architecture, features, tools, memory system, file structure, and workflow execution.
+> **Purpose of this file:** Whenever you open a new AI chat or onboarding session in Antigravity / Cursor / VS Code, this document provides 100% complete, authoritative context of the system architecture, features, tools, memory engine, file structure, API endpoints, and execution workflows.
 
 ---
 
@@ -17,45 +17,46 @@
 ## 🏗️ 2. Core Multi-Agent Architecture
 
 ```
-                                  User Input
-                                      │
-                                      ▼
-                      ┌─────────────────────────────────┐
-                      │    Larvi Master Agent Node      │
-                      │   (LangGraph StateGraph Engine) │
-                      └───────────────┬─────────────────┘
-                                      │
-                                      ▼
-                      ┌─────────────────────────────────┐
-                      │    Intent Classifier Node       │
-                      │ (email | calendar | multi | ...) │
-                      └───────────────┬─────────────────┘
-                                      │
-         ┌────────────────────────────┼───────────────────────────┐
-         ▼                            ▼                           ▼
-┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
-│    Email Agent    │       │  Calendar Agent   │       │  Multi-Agent Node │
-│ (LangChain ReAct) │       │ (LangChain ReAct) │       │ (Email ➔ Calendar)│
-└────────┬──────────┘       └─────────┬─────────┘       └─────────┬─────────┘
-         │                            │                           │
-         ▼                            ▼                           ▼
-┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
-│    Email Tools    │       │  Calendar Tools   │       │ Chained Pipeline  │
-│ (Gmail API Client)│       │(Google Cal Client)│       │  State Resolution │
-└────────┬──────────┘       └─────────┬─────────┘       └─────────┬─────────┘
-         │                            │                           │
-         └────────────────────────────┼───────────────────────────┘
-                                      │
-                                      ▼
-                      ┌─────────────────────────────────┐
-                      │   Response Synthesis Node       │
-                      │  (Context & Memory Injection)   │
-                      └───────────────┬─────────────────┘
-                                      │
-                                      ▼
-                      ┌─────────────────────────────────┐
-                      │  Final Formatted Output ➔ User  │
-                      └─────────────────────────────────┘
+                                  User Input (Text or Voice)
+                                              │
+                                              ▼
+                              ┌─────────────────────────────────┐
+                              │    Larvi Master Agent Node      │
+                              │   (LangGraph StateGraph Engine) │
+                              └───────────────┬─────────────────┘
+                                              │
+                                              ▼
+                              ┌─────────────────────────────────┐
+                              │    Intent Classifier Node       │
+                              │ (email | calendar | multi | ...) │
+                              └───────────────┬─────────────────┘
+                                              │
+                 ┌────────────────────────────┼───────────────────────────┐
+                 ▼                            ▼                           ▼
+        ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
+        │    Email Agent    │       │  Calendar Agent   │       │  Multi-Agent Node │
+        │ (LangChain ReAct) │       │ (LangChain ReAct) │       │ (Email ➔ Calendar)│
+        └────────┬──────────┘       └─────────┬─────────┘       └─────────┬─────────┘
+                 │                            │                           │
+                 ▼                            ▼                           ▼
+        ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
+        │    Email Tools    │       │  Calendar Tools   │       │ Chained Pipeline  │
+        │ (Gmail API Client)│       │(Google Cal Client)│       │  State Resolution │
+        └────────┬──────────┘       └─────────┬─────────┘       └─────────┬─────────┘
+                 │                            │                           │
+                 └────────────────────────────┼───────────────────────────┘
+                                              │
+                                              ▼
+                              ┌─────────────────────────────────┐
+                              │   Response Synthesis Node       │
+                              │  (Context & Memory Injection)   │
+                              └───────────────┬─────────────────┘
+                                              │
+                                              ▼
+                              ┌─────────────────────────────────┐
+                              │  Final Formatted Output ➔ User  │
+                              │ (SSE Real-Time Streaming / Cards│
+                              └─────────────────────────────────┘
 ```
 
 ---
@@ -64,14 +65,17 @@
 
 | Layer | Component / Technology | Role |
 | :--- | :--- | :--- |
-| **LLM Model** | Google Gemini 3.6 Flash (`ChatGoogleGenerativeAI`) | Core reasoning, intent classification, agent thinking |
+| **LLM Model** | Google Gemini (`gemini-2.5-flash`, `gemini-2.5-flash-lite`, `gemini-2.0-flash`) | Core reasoning, intent classification, agent thinking with 1500 RPD free tier & sub-second latency |
+| **Resilience Engine** | Automatic Multi-Model Fallback Cascade (`backend/agents/llm_factory.py`) | Prevents 429 quota exhaustion by cycling through ordered models |
 | **Agent Orchestration** | LangGraph (`StateGraph`) + LangChain ReAct | Graph-based multi-agent routing & subtask coordination |
-| **Backend Framework** | Python 3.11 + FastAPI + Uvicorn | High-performance REST & SSE streaming server |
+| **Backend Framework** | Python 3.11/3.12 + FastAPI + Uvicorn | High-performance REST & SSE streaming server |
 | **Email Integration** | Google Cloud Gmail API (`google-api-python-client`) | Real email search, read, draft, send, reply |
 | **Calendar Integration** | Google Cloud Calendar API | Real schedule viewing, availability check, event CRUD |
-| **Auth System** | Google OAuth 2.0 (`google-auth-oauthlib`) | Desktop OAuth flow with auto token refresh |
-| **Memory System** | Custom In-Memory Context Engine (`WorkingMemory`) | Multi-turn entity resolution ("it", "that meeting") |
-| **Frontend UI** | HTML5, CSS3 (Custom Design System), JavaScript (ES6) | 3-column layout, Live Stepper, Memory Viewer |
+| **Auth System** | Google OAuth 2.0 (`google-auth-oauthlib`) | Desktop OAuth flow & Web redirect flow with auto token refresh |
+| **Memory System** | SQLite (`larvi.db`) + Custom In-Memory Context Engine | Multi-turn entity resolution ("it", "that meeting") & persistent session history |
+| **Frontend UI** | HTML5, Vanilla CSS3 (Curated Design System), Vanilla JS (ES6) | Responsive multi-view UI (Chat, Inbox, Calendar, Profile, Settings) |
+| **Speech-to-Text** | Web Speech API (`SpeechRecognition`) | Real-time voice microphone input in chat bar |
+| **Stream Control** | `AbortController` + Fetch API | Instant Stop Response generation button |
 
 ---
 
@@ -79,30 +83,35 @@
 
 ```
 Final Exam/
+├── GEMINI.md                    # Quick workspace rules and guidelines for AI coding agents
 ├── PROJECT_OVERVIEW.md          # 🌟 Master documentation for new chats & developers
+├── PROJECT_REPORT.md            # Comprehensive project evaluation and implementation report
 ├── README.md                    # Public documentation with setup & usage guides
 ├── .gitignore                   # Ignores .env, credentials.json, token.json, venv
+├── requirements.txt             # Python dependencies
+├── vercel.json                  # Production Vercel deployment configuration
 │
 ├── backend/
-│   ├── main.py                  # FastAPI server entry point (Routes: /chat, /auth, /health)
+│   ├── main.py                  # FastAPI server entry point (Routes: /chat, /chat/stream, /auth, /health, /sessions, /views)
 │   ├── config.py                # Pydantic/dotenv settings manager & environment validator
-│   ├── auth_setup.py            # Quick CLI script to run OAuth login & generate token.json
-│   ├── requirements.txt         # Python dependencies (fastapi, langchain, langgraph, etc.)
-│   ├── .env                     # Local environment file (GEMINI_API_KEY, SECRET_KEY)
+│   ├── auth_setup.py            # Quick CLI script to run desktop OAuth login & generate token.json
+│   ├── requirements.txt         # Backend Python dependencies
+│   ├── .env                     # Local environment file (GEMINI_API_KEY, GOOGLE_CLIENT_ID, etc.)
 │   ├── .env.example             # Template for environment configuration
-│   ├── credentials.json         # Google Cloud OAuth Desktop client credentials (DO NOT COMMIT)
-│   ├── token.json               # Generated user OAuth access/refresh token (DO NOT COMMIT)
+│   ├── credentials.json         # Google Cloud OAuth Desktop client credentials
+│   ├── token.json               # Generated user OAuth access/refresh token
 │   │
 │   ├── agents/                  # 🧠 AI Agent Modules
 │   │   ├── __init__.py
 │   │   ├── master_agent.py      # LangGraph StateGraph, Intent Classifier, Multi-Node Orchestrator
-│   │   ├── email_agent.py       # ReAct agent managing Gmail operations & summarization
-│   │   └── calendar_agent.py    # ReAct agent managing Calendar schedule & availability
+│   │   ├── llm_factory.py       # Resilient LLM factory with automated fallback cascade
+│   │   ├── email_agent.py       # ReAct agent managing Gmail operations & live datetime injection
+│   │   └── calendar_agent.py    # ReAct agent managing Calendar schedule, availability, & live datetime
 │   │
 │   ├── tools/                   # ⚙️ LangChain Tool Definitions
 │   │   ├── __init__.py
 │   │   ├── email_tools.py       # 6 Gmail tools: search, read, recent, draft, send, reply
-│   │   └── calendar_tools.py    # 6 Calendar tools: get, search, freebusy, create, update, delete
+│   │   └── calendar_tools.py    # 6 Calendar tools: get, search, freebusy, create, update, delete (with _parse_int_arg)
 │   │
 │   ├── services/                # 🌐 Real Google API Wrappers
 │   │   ├── __init__.py
@@ -111,27 +120,28 @@ Final Exam/
 │   │
 │   ├── memory/                  # 💾 Context & Working Memory
 │   │   ├── __init__.py
-│   │   └── context_manager.py   # SessionManager & WorkingMemory (entity tracking engine)
+│   │   └── context_manager.py   # SQLite database engine + SessionManager & WorkingMemory
 │   │
 │   └── auth/                    # 🔐 OAuth Authentication
 │       ├── __init__.py
-│       └── google_oauth.py      # OAuth 2.0 flow, token persistence, auto-refresh
+│       └── google_oauth.py      # OAuth 2.0 flow, token persistence, picture/profile attributes, auto-refresh
 │
-└── frontend/                    # 🎨 Editorial Web Interface
-    ├── index.html               # 3-column app shell (Sidebar, Chat, Live Context Panel)
+└── frontend/                    # 🎨 Editorial Glassmorphic Web Interface
+    ├── index.html               # Multi-view app shell (Chat, Inbox, Calendar, Profile, Settings)
     ├── css/
-    │   ├── main.css             # Design tokens, typography, CSS reset
-    │   ├── layout.css           # 3-column responsive layout grid
+    │   ├── main.css             # Design tokens, typography, CSS reset, themes
+    │   ├── layout.css           # Responsive layout grid, topbar, sidebars
     │   ├── chat.css             # Chat bubbles, widgets, chips, markdown styling
-    │   ├── sidebar.css          # Navigation, connection status indicators, agent cards
+    │   ├── sidebar.css          # Chat history hub, mic button, stop button, status indicators
+    │   ├── views.css            # Dedicated Views (Inbox list, Calendar schedule, Profile cards, Settings)
     │   └── components.css       # Modals, confirmation dialogs, toast notifications
     │
     └── js/
-        ├── app.js               # Application bootstrap, event listeners, health checks
-        ├── chat.js              # Chat UI renderer, widgets, markdown formatting
+        ├── app.js               # App bootstrap, Voice mic, Stop button, Views router, Profile management
+        ├── chat.js              # Chat UI renderer, interactive widgets (Email cards, Calendar badges)
         ├── workflow.js          # Live workflow execution stepper & tool activity feed
-        ├── api.js               # Backend HTTP & SSE streaming API client
-        └── context.js           # Frontend state manager (memory & auth sync)
+        ├── api.js               # Backend HTTP & SSE streaming API client (with AbortSignal support)
+        └── context.js           # Frontend state manager (Working memory & Auth sync, Avatar overrides)
 ```
 
 ---
@@ -147,7 +157,7 @@ Final Exam/
 6. `reply_to_email(message_id, body)` — Sends a threaded reply to an existing email.
 
 ### B. Calendar Agent (`backend/tools/calendar_tools.py`)
-1. `get_events(days_ahead)` — Lists upcoming schedule for the next N days.
+1. `get_events(days_ahead)` — Lists upcoming schedule for the next N days (robust integer parsing for strings/JSON).
 2. `search_events(query)` — Searches calendar events by title/topic.
 3. `check_availability(date, start_time, end_time)` — Checks Google Free/Busy API for scheduling conflicts.
 4. `create_event(title, date, start_time, end_time, description, attendees)` — Schedules a new event in Google Calendar.
@@ -165,7 +175,25 @@ Final Exam/
 
 ---
 
-## 🧠 6. Context & Working Memory System
+## 🎙️ 6. Real-Time Interaction Features
+
+1. **Voice Input (Microphone):**
+   - Click the microphone icon in the chat input bar to speak prompts directly.
+   - Built with the native browser Web Speech API. Real-time transcript fills the textarea automatically.
+
+2. **Stop Response Generation Button:**
+   - When the agent is streaming or executing tools, the Send button turns into a pulsing red Stop Button.
+   - Clicking it triggers an `AbortController` signal, instantly stopping generation and resetting UI state.
+
+3. **User Profile System:**
+   - Custom Profile Picture upload (stored locally and synced across header and sidebar).
+   - Personal profile information edit form (Name, Email, Role) with instant save.
+   - Change Password form with validation.
+   - Multi-point Logout buttons (Top Header, Left Sidebar footer, Profile view).
+
+---
+
+## 🧠 7. Context & Working Memory System
 
 Located in [`backend/memory/context_manager.py`](file:///d:/DEVFORGE_INTERNSHIP/Final%20Exam/backend/memory/context_manager.py):
 
@@ -181,20 +209,12 @@ Located in [`backend/memory/context_manager.py`](file:///d:/DEVFORGE_INTERNSHIP/
 
 ---
 
-## 🛡️ 7. Safety, Security & Confirmation
-
-* **Sensitive Action Protection:** Destructive actions (sending emails, deleting calendar events) require explicit user confirmation.
-* **Credential Protection:** `.env`, `credentials.json`, and `token.json` are excluded from version control via `.gitignore`.
-* **Graceful Degradation:** If Google APIs or Gemini encounter rate limits or missing credentials, clean error messages are returned instead of server crashes.
-
----
-
 ## 🚀 8. Quick Commands for Running the Project
 
 ### Start Backend:
 ```bash
 cd backend
-python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+python -m uvicorn main:app --host 127.0.0.1 --port 8000
 ```
 
 ### Start Frontend:
@@ -211,6 +231,11 @@ python auth_setup.py
 ```
 > Opens browser for granting Gmail + Calendar permissions and generates `token.json`.
 
+### Deploy to Production (Vercel):
+```bash
+npx vercel --prod --yes
+```
+
 ---
 
 ## 🌐 9. API Endpoints Reference
@@ -223,9 +248,11 @@ python auth_setup.py
 | `/auth/status` | `GET` | Returns whether Gmail & Calendar tokens are active for a session |
 | `/auth/login` | `GET` | Initiates Web OAuth flow & redirects user to Google Consent Screen |
 | `/auth/callback` | `GET` | Google OAuth callback handler that binds token to user session |
-| `/auth/init` | `GET` | Fallback OAuth redirect for web browsers |
-| `/session/{id}/memory` | `GET` | Inspects working memory for a given session |
-| `/session/{id}` | `DELETE` | Clears conversation history and working memory |
+| `/sessions` | `GET` | Lists all saved conversations from SQLite database |
+| `/sessions/{id}` | `GET` | Loads conversation history for a specific session |
+| `/sessions/{id}` | `DELETE` | Deletes a conversation session from SQLite database |
+| `/views/inbox` | `GET` | Fetches email list for Mail Inbox view |
+| `/views/calendar` | `GET` | Fetches events list for Calendar Schedule view |
 | `/docs` | `GET` | Interactive Swagger API documentation |
 
 ---
