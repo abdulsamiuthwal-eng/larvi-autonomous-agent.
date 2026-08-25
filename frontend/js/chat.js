@@ -33,7 +33,12 @@ function renderUserMessage(text) {
   const group = document.createElement('div');
   group.className = 'message-group user';
   group.innerHTML = `
-    <div class="msg-avatar user-avatar">U</div>
+    <div class="msg-avatar user-avatar" title="You">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+    </div>
     <div class="msg-body">
       <div class="user-bubble">${escapeHtml(text)}</div>
     </div>
@@ -63,7 +68,13 @@ function startStreamingLarviMessage(agentLabel = 'Larvi', intent = '') {
   const agentBadge = buildAgentBadge(agentLabel, intent);
 
   group.innerHTML = `
-    <div class="msg-avatar larvi-avatar">L</div>
+    <div class="msg-avatar larvi-avatar" title="Larvi AI">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+        <path d="M2 17l10 5 10-5"></path>
+        <path d="M2 12l10 5 10-5"></path>
+      </svg>
+    </div>
     <div class="msg-body">
       <div class="larvi-card">
         <div class="larvi-card-header">
@@ -115,8 +126,10 @@ function appendStreamingToolCall(tc) {
     pill.className = 'tool-call-pill';
     pill.innerHTML = `
       <span class="tool-status-dot"></span>
-      <span class="tool-icon">🔧</span>
-      ${escapeHtml(tc.summary || tc.tool || 'Tool Execution')}
+      <span class="tool-icon">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </span>
+      <span>${escapeHtml(tc.summary || tc.tool || 'Tool Execution')}</span>
     `;
     currentToolSec.appendChild(pill);
     scrollToBottom();
@@ -233,7 +246,13 @@ function renderLarviMessage(data) {
   const smartWidgetsHtml = extractSmartWidgets(data);
 
   group.innerHTML = `
-    <div class="msg-avatar larvi-avatar">L</div>
+    <div class="msg-avatar larvi-avatar" title="Larvi AI">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+        <path d="M2 17l10 5 10-5"></path>
+        <path d="M2 12l10 5 10-5"></path>
+      </svg>
+    </div>
     <div class="msg-body">
       <div class="larvi-card">
         <div class="larvi-card-header">
@@ -260,14 +279,38 @@ function renderLarviMessage(data) {
  */
 function buildAgentBadge(agentUsed, intent) {
   const INTENT_BADGE = {
-    email: { cls: 'badge-amber', label: '📧 Email Agent' },
-    calendar: { cls: 'badge-emerald', label: '📅 Calendar Agent' },
-    multi: { cls: 'badge-accent', label: '🤖 Master Agent → Email + Calendar' },
-    chitchat: { cls: 'badge-stone', label: '🤖 Larvi' },
-    error: { cls: 'badge-stone', label: '⚠️ System' },
+    email: {
+      cls: 'badge-amber',
+      icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>',
+      label: 'Email Agent',
+    },
+    calendar: {
+      cls: 'badge-emerald',
+      icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+      label: 'Calendar Agent',
+    },
+    multi: {
+      cls: 'badge-accent',
+      icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8.01" y2="16"></line><line x1="16" y1="16" x2="16.01" y2="16"></line></svg>',
+      label: 'Master Agent → Email + Calendar',
+    },
+    chitchat: {
+      cls: 'badge-stone',
+      icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+      label: 'Larvi',
+    },
+    error: {
+      cls: 'badge-stone',
+      icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+      label: 'System',
+    },
   };
-  const cfg = INTENT_BADGE[intent] || { cls: 'badge-stone', label: agentUsed };
-  return `<span class="badge ${cfg.cls}">${cfg.label}</span>`;
+  const cfg = INTENT_BADGE[intent] || {
+    cls: 'badge-stone',
+    icon: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+    label: agentUsed || 'Larvi',
+  };
+  return `<span class="badge ${cfg.cls}">${cfg.icon}<span>${cfg.label}</span></span>`;
 }
 
 /**
@@ -278,8 +321,10 @@ function buildToolCallsSection(toolCalls) {
   const pills = toolCalls.map(tc => `
     <div class="tool-call-pill">
       <span class="tool-status-dot"></span>
-      <span class="tool-icon">🔧</span>
-      ${escapeHtml(tc.summary || tc.tool)}
+      <span class="tool-icon">
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </span>
+      <span>${escapeHtml(tc.summary || tc.tool)}</span>
     </div>
   `).join('');
   return `<div class="tool-calls-section">${pills}</div>`;

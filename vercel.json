@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "backend/main.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb"
+      }
     },
     {
       "src": "frontend/**",
@@ -12,8 +15,28 @@
   ],
   "routes": [
     {
-      "src": "/(chat|chat/stream|sessions|sessions/.*|session/.*|auth/.*|health|docs|openapi.json)",
+      "src": "/api/(.*)",
       "dest": "backend/main.py"
+    },
+    {
+      "src": "/(chat|chat/stream|sessions|sessions/.*|auth/.*|health|emails/.*|calendar/.*|settings/.*|docs|openapi\\.json)",
+      "dest": "backend/main.py"
+    },
+    {
+      "src": "/",
+      "dest": "frontend/splash.html"
+    },
+    {
+      "src": "/splash",
+      "dest": "frontend/splash.html"
+    },
+    {
+      "src": "/login",
+      "dest": "frontend/login.html"
+    },
+    {
+      "src": "/app",
+      "dest": "frontend/index.html"
     },
     {
       "src": "/(.*)",

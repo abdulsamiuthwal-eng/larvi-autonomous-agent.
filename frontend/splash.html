@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Larvi — Autonomous AI Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent:       #C2410C;
+      --accent-light: #EA580C;
+      --accent-glow:  rgba(194,65,12,.45);
+      --amber:        #D97706;
+      --amber-glow:   rgba(217,119,6,.35);
+      --emerald:      #15803D;
+      --dark-bg:      #0D0B08;
+      --dark-surface: #171310;
+      --dark-2:       #1F1A14;
+      --text-primary: #F7F3EE;
+      --text-muted:   #A89B8C;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--dark-bg);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow: hidden;
+      color: var(--text-primary);
+    }
+
+    /* ── Canvas Background ── */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    /* ── Scene Container ── */
+    .scene {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      gap: 0;
+    }
+
+    /* ── Central 3D Orb System ── */
+    .orb-system {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin-bottom: 12px;
+      perspective: 1200px;
+      transform-style: preserve-3d;
+    }
+
+    .orb-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      animation: ring-spin 8s linear infinite;
+      transform-style: preserve-3d;
+    }
+    .orb-ring:nth-child(1) {
+      border: 1.5px solid rgba(194,65,12,.6);
+      box-shadow: 0 0 20px rgba(194,65,12,.2), inset 0 0 20px rgba(194,65,12,.05);
+      animation-duration: 7s;
+    }
+    .orb-ring:nth-child(2) {
+      inset: 14px;
+      border: 1.5px solid rgba(217,119,6,.5);
+      box-shadow: 0 0 16px rgba(217,119,6,.2);
+      animation-duration: 5s;
+      animation-direction: reverse;
+      transform: rotateX(60deg);
+    }
+    .orb-ring:nth-child(3) {
+      inset: 28px;
+      border: 1px solid rgba(21,128,61,.45);
+      box-shadow: 0 0 12px rgba(21,128,61,.15);
+      animation-duration: 11s;
+      transform: rotateY(60deg);
+    }
+
+    @keyframes ring-spin {
+      from { transform: rotate3d(1,.5,.2,0deg); }
+      to   { transform: rotate3d(1,.5,.2,360deg); }
+    }
+
+    /* Core orb */
+    .orb-core {
+      position: absolute;
+      inset: 40px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%,
+        rgba(234,88,12,.9) 0%,
+        rgba(194,65,12,.7) 25%,
+        rgba(120,40,6,.5) 55%,
+        rgba(13,11,8,.9) 100%
+      );
+      box-shadow:
+        0 0 60px rgba(194,65,12,.5),
+        0 0 120px rgba(194,65,12,.2),
+        0 0 200px rgba(194,65,12,.08),
+        inset 0 0 30px rgba(234,88,12,.3),
+        inset 2px 3px 8px rgba(255,200,150,.2);
+      animation: orb-pulse 3s ease-in-out infinite;
+    }
+    @keyframes orb-pulse {
+      0%,100% { transform: scale(1);   box-shadow: 0 0 60px rgba(194,65,12,.5), 0 0 120px rgba(194,65,12,.2), 0 0 200px rgba(194,65,12,.08), inset 0 0 30px rgba(234,88,12,.3); }
+      50%      { transform: scale(1.06); box-shadow: 0 0 80px rgba(194,65,12,.7), 0 0 160px rgba(194,65,12,.3), 0 0 280px rgba(194,65,12,.12), inset 0 0 40px rgba(234,88,12,.4); }
+    }
+
+    /* Specular highlight */
+    .orb-core::before {
+      content: '';
+      position: absolute;
+      top: 12%; left: 18%;
+      width: 30%; height: 22%;
+      border-radius: 50%;
+      background: radial-gradient(ellipse, rgba(255,220,180,.55) 0%, transparent 100%);
+      filter: blur(2px);
+    }
+
+    /* Orbiting dots */
+    .orbit-dot {
+      position: absolute;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--amber);
+      box-shadow: 0 0 12px var(--amber), 0 0 24px rgba(217,119,6,.4);
+      top: 50%; left: 50%;
+      transform-origin: 0 0;
+      animation: dot-orbit 4s linear infinite;
+    }
+    .orbit-dot:nth-child(5) {
+      width: 6px; height: 6px;
+      background: var(--emerald);
+      box-shadow: 0 0 10px var(--emerald);
+      animation-duration: 6s;
+      animation-delay: -2s;
+      transform-origin: 0 0;
+    }
+    .orbit-dot:nth-child(6) {
+      width: 5px; height: 5px;
+      background: rgba(234,88,12,.9);
+      box-shadow: 0 0 8px rgba(234,88,12,.8);
+      animation-duration: 3.5s;
+      animation-delay: -1s;
+    }
+
+    @keyframes dot-orbit {
+      from { transform: translate(-50%,-50%) rotate(0deg) translateX(96px); }
+      to   { transform: translate(-50%,-50%) rotate(360deg) translateX(96px); }
+    }
+
+    /* ── Brand ── */
+    .brand {
+      text-align: center;
+      animation: fade-up .6s ease-out .4s both;
+      margin-bottom: 8px;
+    }
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .brand-wordmark {
+      font-size: 52px;
+      font-weight: 900;
+      letter-spacing: -3px;
+      line-height: 1;
+      background: linear-gradient(135deg,
+        #F97316 0%,
+        #C2410C 30%,
+        #D97706 60%,
+        #F97316 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(194,65,12,.4));
+    }
+
+    .brand-tagline {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
+
+    /* ── Feature Pills ── */
+    .feature-pills {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0 28px;
+      animation: fade-up .6s ease-out .65s both;
+    }
+
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px;
+      border-radius: 100px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      backdrop-filter: blur(12px);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: all .25s;
+    }
+    .pill-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .pill:nth-child(1) .pill-dot { background: var(--amber); box-shadow: 0 0 6px var(--amber-glow); }
+    .pill:nth-child(2) .pill-dot { background: var(--emerald); box-shadow: 0 0 6px rgba(21,128,61,.5); }
+    .pill:nth-child(3) .pill-dot { background: var(--accent-light); box-shadow: 0 0 6px var(--accent-glow); }
+
+    /* ── Loading Bar ── */
+    .loader-wrap {
+      width: 240px;
+      animation: fade-up .6s ease-out .85s both;
+    }
+
+    .loader-track {
+      width: 100%;
+      height: 2px;
+      background: rgba(255,255,255,.08);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .loader-fill {
+      height: 100%;
+      border-radius: 10px;
+      background: linear-gradient(90deg, var(--accent), var(--amber), var(--accent));
+      background-size: 200% 100%;
+      animation: loader-move 2.8s cubic-bezier(.4,0,.2,1) forwards,
+                 loader-shimmer 1s linear infinite;
+      width: 0%;
+    }
+    @keyframes loader-move {
+      0%   { width: 0%; }
+      30%  { width: 45%; }
+      60%  { width: 72%; }
+      85%  { width: 90%; }
+      100% { width: 100%; }
+    }
+    @keyframes loader-shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .loader-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: .08em;
+      text-align: center;
+      opacity: .7;
+    }
+    #loader-text { transition: opacity .3s; }
+
+    /* ── Floating Data Cards (4D feel) ── */
+    .data-card {
+      position: fixed;
+      backdrop-filter: blur(14px);
+      background: rgba(31,26,20,.7);
+      border: 1px solid rgba(194,65,12,.18);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      z-index: 5;
+      animation: float-card 6s ease-in-out infinite;
+    }
+    .data-card svg { opacity: .7; flex-shrink: 0; }
+
+    .data-card:nth-child(1) {
+      top: 18%; left: 8%;
+      animation-delay: 0s;
+    }
+    .data-card:nth-child(2) {
+      top: 22%; right: 8%;
+      animation-delay: -2s;
+    }
+    .data-card:nth-child(3) {
+      bottom: 22%; left: 9%;
+      animation-delay: -4s;
+    }
+    .data-card:nth-child(4) {
+      bottom: 20%; right: 9%;
+      animation-delay: -1.5s;
+    }
+
+    @keyframes float-card {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      33%      { transform: translateY(-10px) rotate(.5deg); }
+      66%      { transform: translateY(6px) rotate(-.3deg); }
+    }
+
+    .card-val {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: block;
+    }
+    .card-lbl {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      opacity: .6;
+    }
+    .card-accent { color: var(--accent-light); }
+    .card-amber  { color: var(--amber); }
+    .card-emerald{ color: var(--emerald); }
+
+    /* ── Exit transition ── */
+    body.exit {
+      animation: page-exit .6s cubic-bezier(.4,0,1,1) forwards;
+    }
+    @keyframes page-exit {
+      to { opacity: 0; transform: scale(1.04); }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .data-card { display: none; }
+      .brand-wordmark { font-size: 42px; }
+      .orb-system { width: 180px; height: 180px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Neural net / particle canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Floating 4D data cards -->
+  <div class="data-card" style="animation-delay:0s">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <div>
+      <span class="card-val card-amber">2,847</span>
+      <span class="card-lbl">Emails Processed</span>
+    </div>
+  </div>
+
+  <div class="data-card" style="animation-delay:-2s">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <div>
+      <span class="card-val card-emerald">142</span>
+      <span class="card-lbl">Events Scheduled</span>
+    </div>
+  </div>
+
+  <div class="data-card" style="animation-delay:-4s">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    <div>
+      <span class="card-val card-accent">98.7%</span>
+      <span class="card-lbl">AI Accuracy</span>
+    </div>
+  </div>
+
+  <div class="data-card" style="animation-delay:-1.5s">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    <div>
+      <span class="card-val" style="color:#C2410C">256-bit</span>
+      <span class="card-lbl">Encrypted</span>
+    </div>
+  </div>
+
+  <!-- Main scene -->
+  <div class="scene">
+    <!-- 3D Orb system -->
+    <div class="orb-system">
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-ring"></div>
+      <div class="orb-core"></div>
+      <div class="orbit-dot"></div>
+      <div class="orbit-dot"></div>
+      <div class="orbit-dot"></div>
+    </div>
+
+    <!-- Branding -->
+    <div class="brand">
+      <div class="brand-wordmark">Larvi</div>
+      <div class="brand-tagline">Autonomous Email &amp; Calendar AI</div>
+    </div>
+
+    <!-- Feature pills -->
+    <div class="feature-pills">
+      <div class="pill"><div class="pill-dot"></div>Email Agent</div>
+      <div class="pill"><div class="pill-dot"></div>Calendar AI</div>
+      <div class="pill"><div class="pill-dot"></div>LangGraph</div>
+    </div>
+
+    <!-- Progress loader -->
+    <div class="loader-wrap">
+      <div class="loader-track">
+        <div class="loader-fill" id="loader-fill"></div>
+      </div>
+      <div class="loader-label" id="loader-text">Initializing neural pathways…</div>
+    </div>
+  </div>
+
+  <script>
+    /* ── Neural Network Canvas ── */
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Nodes
+    const NODE_COUNT = 65;
+    const nodes = Array.from({ length: NODE_COUNT }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - .5) * .35,
+      vy: (Math.random() - .5) * .35,
+      r: Math.random() * 2 + 1,
+      alpha: Math.random() * .6 + .2,
+      pulse: Math.random() * Math.PI * 2,
+    }));
+
+    const COLORS = ['194,65,12', '217,119,6', '21,128,61'];
+    const CONNECT_DIST = 140;
+
+    let frame = 0;
+    function draw() {
+      frame++;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Update nodes
+      nodes.forEach(n => {
+        n.x += n.vx;
+        n.y += n.vy;
+        n.pulse += .012;
+        if (n.x < 0 || n.x > canvas.width)  n.vx *= -1;
+        if (n.y < 0 || n.y > canvas.height) n.vy *= -1;
+      });
+
+      // Draw edges
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const a = nodes[i], b = nodes[j];
+          const dx = a.x - b.x, dy = a.y - b.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < CONNECT_DIST) {
+            const alpha = (1 - dist / CONNECT_DIST) * .18;
+            const c = COLORS[(i + j) % 3];
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(${c},${alpha})`;
+            ctx.lineWidth = .8;
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Draw nodes
+      nodes.forEach((n, i) => {
+        const pulse = Math.sin(n.pulse) * .3 + .7;
+        const c = COLORS[i % 3];
+        const r = n.r * pulse;
+
+        // Glow
+        const grd = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, r * 5);
+        grd.addColorStop(0, `rgba(${c},${n.alpha * pulse * .5})`);
+        grd.addColorStop(1, `rgba(${c},0)`);
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r * 5, 0, Math.PI * 2);
+        ctx.fillStyle = grd;
+        ctx.fill();
+
+        // Core dot
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${c},${n.alpha * pulse})`;
+        ctx.fill();
+      });
+
+      // Subtle vignette
+      const vig = ctx.createRadialGradient(
+        canvas.width/2, canvas.height/2, canvas.height*.2,
+        canvas.width/2, canvas.height/2, canvas.height*.85
+      );
+      vig.addColorStop(0, 'transparent');
+      vig.addColorStop(1, 'rgba(13,11,8,.55)');
+      ctx.fillStyle = vig;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      requestAnimationFrame(draw);
+    }
+    draw();
+
+    /* ── Loader messages ── */
+    const messages = [
+      'Initializing neural pathways…',
+      'Connecting to AI core…',
+      'Loading email intelligence…',
+      'Calibrating calendar agent…',
+      'Syncing LangGraph engine…',
+      'Ready.',
+    ];
+    let msgIdx = 0;
+    const loaderText = document.getElementById('loader-text');
+
+    const msgInterval = setInterval(() => {
+      msgIdx++;
+      if (msgIdx < messages.length) {
+        loaderText.style.opacity = 0;
+        setTimeout(() => {
+          loaderText.textContent = messages[msgIdx];
+          loaderText.style.opacity = 1;
+        }, 200);
+      } else {
+        clearInterval(msgInterval);
+      }
+    }, 520);
+
+    /* ── Auto redirect to login ── */
+    setTimeout(() => {
+      document.body.classList.add('exit');
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 600);
+    }, 3400);
+  </script>
+</body>
+</html>

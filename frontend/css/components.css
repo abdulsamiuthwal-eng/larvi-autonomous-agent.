@@ -237,17 +237,154 @@
 /* ── Empty State ───────────────────────────────────────────────── */
 .empty-state {
   text-align: center;
-  padding: var(--space-8) var(--space-4);
+  padding: var(--space-10) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty-state-icon {
-  font-size: 28px;
-  margin-bottom: var(--space-3);
-  opacity: 0.4;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto var(--space-4);
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 237, 213, 0.9) 0%, rgba(254, 215, 170, 0.5) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(234, 88, 12, 0.28);
+  box-shadow: 0 6px 18px -3px rgba(194, 65, 12, 0.18), inset 0 1.5px 2px rgba(255, 255, 255, 0.9);
+  color: var(--color-accent);
+  transition: transform var(--transition-fast);
+}
+
+.empty-state-icon svg {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 1px 2px rgba(194, 65, 12, 0.2));
+}
+
+.empty-state:hover .empty-state-icon {
+  transform: translateY(-2px) scale(1.04);
 }
 
 .empty-state-text {
   font-size: var(--font-sm);
-  color: var(--color-text-faint);
+  color: var(--color-text-secondary);
   line-height: 1.6;
+  max-width: 360px;
 }
+
+/* ── Confirmation Modal (Delete Chat & Actions) ──────────────────── */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 25, 23, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.modal-backdrop.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-card {
+  background: #1C1917;
+  color: #F7F6F2;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transform: scale(0.95);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-backdrop.active .modal-card {
+  transform: scale(1);
+}
+
+.modal-header {
+  margin-bottom: 12px;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+}
+
+.modal-body {
+  margin-bottom: 24px;
+}
+
+.modal-body p {
+  font-size: 14px;
+  color: #D6D3D1;
+  line-height: 1.5;
+}
+
+.modal-body strong {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.modal-subtext {
+  font-size: 12px !important;
+  color: #A8A29E !important;
+  margin-top: 6px;
+}
+
+.modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-modal {
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  outline: none;
+}
+
+.btn-modal-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: #E7E5E4;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.btn-modal-cancel:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
+}
+
+.btn-modal-delete {
+  background: #E11D48;
+  color: #FFFFFF;
+}
+
+.btn-modal-delete:hover {
+  background: #F43F5E;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
+}
+

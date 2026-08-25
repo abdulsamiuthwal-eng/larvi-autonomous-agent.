@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/chat.css" />
   <link rel="stylesheet" href="css/sidebar.css" />
   <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/views.css" />
 </head>
 <body>
 
@@ -19,6 +20,25 @@
      TOAST NOTIFICATION CONTAINER
      ═══════════════════════════════════════════════════════════════ -->
 <div id="toast-container" aria-live="polite"></div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CONFIRMATION MODAL (DELETE CHAT & DESTRUCTIVE ACTIONS)
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="modal-backdrop" class="modal-backdrop" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-header">
+      <h3 id="modal-title" class="modal-title">Delete chat?</h3>
+    </div>
+    <div class="modal-body">
+      <p id="modal-description">This will delete <strong id="modal-chat-title">this conversation</strong>.</p>
+      <p class="modal-subtext">This action cannot be undone.</p>
+    </div>
+    <div class="modal-actions">
+      <button id="modal-cancel-btn" class="btn-modal btn-modal-cancel">Cancel</button>
+      <button id="modal-confirm-btn" class="btn-modal btn-modal-delete">Delete</button>
+    </div>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      MAIN 3-COLUMN APP SHELL
@@ -52,7 +72,15 @@
 
       <!-- Master Agent -->
       <div class="agent-status-item">
-        <div class="agent-icon master">🤖</div>
+        <div class="agent-icon master">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"></rect>
+            <circle cx="12" cy="5" r="2"></circle>
+            <path d="M12 7v4"></path>
+            <line x1="8" y1="16" x2="8.01" y2="16"></line>
+            <line x1="16" y1="16" x2="16.01" y2="16"></line>
+          </svg>
+        </div>
         <div class="agent-status-info">
           <div class="agent-status-name">
             Master Agent
@@ -64,7 +92,12 @@
 
       <!-- Email Agent -->
       <div class="agent-status-item">
-        <div class="agent-icon email">📧</div>
+        <div class="agent-icon email">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </div>
         <div class="agent-status-info">
           <div class="agent-status-name">
             Email Agent
@@ -76,7 +109,14 @@
 
       <!-- Calendar Agent -->
       <div class="agent-status-item">
-        <div class="agent-icon cal">📅</div>
+        <div class="agent-icon cal">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
         <div class="agent-status-info">
           <div class="agent-status-name">
             Calendar Agent
@@ -205,70 +245,289 @@
       </div>
     </header>
 
-    <!-- Chat Message Stream -->
-    <div id="chat-area" role="log" aria-live="polite" aria-label="Conversation">
+    <!-- ═════════════════════════════════════════════════════════════
+         VIEW: CHAT & WORKFLOWS (DEFAULT)
+         ═════════════════════════════════════════════════════════════ -->
+    <div id="view-chat" class="app-view active">
+      <!-- Chat Message Stream -->
+      <div id="chat-area" role="log" aria-live="polite" aria-label="Conversation">
 
-      <!-- Welcome Screen -->
-      <div id="welcome-screen">
-        <div id="welcome-logo" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-            <path d="M2 17l10 5 10-5"/>
-            <path d="M2 12l10 5 10-5"/>
-          </svg>
+        <!-- Welcome Screen -->
+        <div id="welcome-screen">
+          <div id="welcome-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+              <path d="M2 17l10 5 10-5"/>
+              <path d="M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <h1 id="welcome-title">Good day. I'm Larvi.</h1>
+          <p id="welcome-subtitle">
+            Your autonomous AI assistant for email and calendar.
+            Ask me anything — I'll find, draft, schedule, or manage it for you.
+          </p>
+          <div class="welcome-chips">
+            <button class="welcome-chip" onclick="window.sendQuickMessage('Show me my latest emails')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              <span>Latest emails</span>
+            </button>
+            <button class="welcome-chip" onclick="window.sendQuickMessage('What meetings do I have today?')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>Today's meetings</span>
+            </button>
+            <button class="welcome-chip" onclick="window.sendQuickMessage('Summarize my unread emails')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+              <span>Unread summary</span>
+            </button>
+            <button class="welcome-chip" onclick="window.sendQuickMessage('Am I free tomorrow at 3 PM?')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span>Check availability</span>
+            </button>
+            <button class="welcome-chip" onclick="window.sendQuickMessage('Find emails from Ahmed about the project')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <span>Find emails</span>
+            </button>
+            <button class="welcome-chip" onclick="window.sendQuickMessage('Schedule a team meeting tomorrow at 2 PM')">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="10" x2="12" y2="16"/><line x1="9" y1="13" x2="15" y2="13"/></svg>
+              <span>Schedule meeting</span>
+            </button>
+          </div>
         </div>
-        <h1 id="welcome-title">Good day. I'm Larvi.</h1>
-        <p id="welcome-subtitle">
-          Your autonomous AI assistant for email and calendar.
-          Ask me anything — I'll find, draft, schedule, or manage it for you.
-        </p>
-        <div class="welcome-chips">
-          <button class="welcome-chip" onclick="window.sendQuickMessage('Show me my latest emails')">📧 Latest emails</button>
-          <button class="welcome-chip" onclick="window.sendQuickMessage('What meetings do I have today?')">📅 Today\'s meetings</button>
-          <button class="welcome-chip" onclick="window.sendQuickMessage('Summarize my unread emails')">📋 Unread summary</button>
-          <button class="welcome-chip" onclick="window.sendQuickMessage('Am I free tomorrow at 3 PM?')">⏰ Check availability</button>
-          <button class="welcome-chip" onclick="window.sendQuickMessage('Find emails from Ahmed about the project')">🔍 Find emails from Ahmed</button>
-          <button class="welcome-chip" onclick="window.sendQuickMessage('Schedule a team meeting tomorrow at 2 PM')">➕ Schedule meeting</button>
+
+        <!-- Typing Indicator -->
+        <div id="typing-indicator" aria-label="Larvi is thinking" role="status">
+          <div class="msg-avatar larvi-avatar" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="typing-bubble" aria-hidden="true">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+
+      </div><!-- /chat-area -->
+
+      <!-- Input Dock -->
+      <div id="chat-input-dock">
+        <!-- Quick Action Chips -->
+        <div class="quick-actions-row" id="quick-chips-row" aria-label="Quick actions">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Input Row -->
+        <div class="input-row" role="group" aria-label="Message input">
+          <textarea
+            id="chat-input"
+            placeholder="Ask Larvi to manage your emails or calendar…"
+            rows="1"
+            aria-label="Type your message"
+            autocomplete="off"
+            spellcheck="true"
+          ></textarea>
+          <button id="send-btn" aria-label="Send message" title="Send (Enter)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div><!-- /chat-input-dock -->
+    </div><!-- /view-chat -->
+
+    <!-- ═════════════════════════════════════════════════════════════
+         VIEW: MAIL INBOX
+         ═════════════════════════════════════════════════════════════ -->
+    <div id="view-inbox" class="app-view" style="display:none;">
+      <div class="view-content-container">
+        <div class="view-header-row">
+          <div>
+            <h2 class="view-title">Gmail Inbox</h2>
+            <p class="view-subtitle">Browse and manage your Google Mail messages directly or via Larvi AI.</p>
+          </div>
+          <div class="view-actions-group">
+            <button id="inbox-refresh-btn" class="btn btn-secondary btn-sm" title="Refresh Inbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Refresh
+            </button>
+            <button id="inbox-compose-btn" class="btn btn-primary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Draft with Larvi
+            </button>
+          </div>
+        </div>
+
+        <div id="inbox-list-container" class="dashboard-list-container">
+          <div class="dashboard-loading"><div class="spinner"></div> Loading emails…</div>
         </div>
       </div>
+    </div>
 
-      <!-- Typing Indicator -->
-      <div id="typing-indicator" aria-label="Larvi is thinking" role="status">
-        <div class="msg-avatar larvi-avatar" aria-hidden="true">L</div>
-        <div class="typing-bubble" aria-hidden="true">
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
-          <div class="typing-dot"></div>
+    <!-- ═════════════════════════════════════════════════════════════
+         VIEW: SCHEDULE / CALENDAR
+         ═════════════════════════════════════════════════════════════ -->
+    <div id="view-calendar" class="app-view" style="display:none;">
+      <div class="view-content-container">
+        <div class="view-header-row">
+          <div>
+            <h2 class="view-title">Schedule &amp; Agenda</h2>
+            <p class="view-subtitle">Review upcoming meetings, availability, and Google Calendar events.</p>
+          </div>
+          <div class="view-actions-group">
+            <button id="calendar-refresh-btn" class="btn btn-secondary btn-sm" title="Refresh Schedule">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+              Refresh
+            </button>
+            <button id="calendar-schedule-btn" class="btn btn-primary btn-sm">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Schedule Meeting
+            </button>
+          </div>
+        </div>
+
+        <div id="calendar-list-container" class="dashboard-list-container">
+          <div class="dashboard-loading"><div class="spinner"></div> Loading calendar events…</div>
         </div>
       </div>
+    </div>
 
-    </div><!-- /chat-area -->
+    <!-- ═════════════════════════════════════════════════════════════
+         VIEW: SETTINGS & PRIVACY
+         ═════════════════════════════════════════════════════════════ -->
+    <div id="view-settings" class="app-view" style="display:none;">
+      <div class="view-content-container settings-container">
+        <div class="view-header-row">
+          <div>
+            <h2 class="view-title">Settings &amp; System Configuration</h2>
+            <p class="view-subtitle">Manage Google credentials, AI engine parameters, database memory, and privacy controls.</p>
+          </div>
+        </div>
 
-    <!-- Input Dock -->
-    <div id="chat-input-dock">
-      <!-- Quick Action Chips -->
-      <div class="quick-actions-row" id="quick-chips-row" aria-label="Quick actions">
-        <!-- Populated by JS -->
+        <div class="settings-grid">
+
+          <!-- Section 1: Google Account & OAuth -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="settings-card-title">
+                <span class="settings-icon-badge google-badge">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                Google Services &amp; Authentication
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-field-row">
+                <div>
+                  <div class="settings-field-label">Connected Google Account</div>
+                  <div class="settings-field-desc" id="settings-user-email-display">Checking connection…</div>
+                </div>
+                <div id="settings-auth-action-btn-container">
+                  <!-- Dynamically rendered: Connect or Disconnect -->
+                </div>
+              </div>
+              <div class="settings-divider"></div>
+              <div class="settings-scope-pills">
+                <span class="scope-pill active">✓ Gmail API (Read / Write / Drafts)</span>
+                <span class="scope-pill active">✓ Google Calendar (Events &amp; Free/Busy)</span>
+                <span class="scope-pill active">✓ OAuth 2.0 Security Token</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: AI Engine Architecture -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="settings-card-title">
+                <span class="settings-icon-badge ai-badge">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                </span>
+                AI Model &amp; LangGraph Architecture
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-info-grid">
+                <div class="settings-info-box">
+                  <div class="info-label">Active AI Cascade</div>
+                  <div class="info-val">Gemini 2.5 / 3.5 Flash</div>
+                </div>
+                <div class="settings-info-box">
+                  <div class="info-label">Orchestration</div>
+                  <div class="info-val">LangGraph ReAct Loop</div>
+                </div>
+                <div class="settings-info-box">
+                  <div class="info-label">Streaming Protocol</div>
+                  <div class="info-val">Server-Sent Events (SSE)</div>
+                </div>
+                <div class="settings-info-box">
+                  <div class="info-label">Human-in-the-Loop</div>
+                  <div class="info-val">Active (Send/Delete Guard)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Privacy & Database Memory -->
+          <div class="settings-card">
+            <div class="settings-card-header">
+              <div class="settings-card-title">
+                <span class="settings-icon-badge db-badge">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                </span>
+                Database Memory &amp; Storage Management
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <div class="settings-stats-row">
+                <div class="stat-badge">
+                  <span class="stat-num" id="stat-sessions-num">0</span>
+                  <span class="stat-lbl">Active Sessions</span>
+                </div>
+                <div class="stat-badge">
+                  <span class="stat-num" id="stat-messages-num">0</span>
+                  <span class="stat-lbl">Stored Messages</span>
+                </div>
+                <div class="stat-badge">
+                  <span class="stat-num">SQLite</span>
+                  <span class="stat-lbl">Storage Engine</span>
+                </div>
+              </div>
+              <div class="settings-divider"></div>
+              <div class="settings-actions-flex">
+                <button id="settings-export-btn" class="btn btn-secondary btn-sm">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Export All Conversations (JSON)
+                </button>
+                <button id="settings-clear-chats-btn" class="btn btn-secondary btn-sm text-rose">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                  Clear All Chat History
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Danger Zone / Delete Account -->
+          <div class="settings-card danger-zone-card">
+            <div class="settings-card-header">
+              <div class="settings-card-title text-rose">
+                <span class="settings-icon-badge danger-badge">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                Danger Zone: Account &amp; System Reset
+              </div>
+            </div>
+            <div class="settings-card-body">
+              <p class="danger-desc">
+                Permanently delete all session memory, clear Google authentication tokens, and wipe all local databases. This action is irreversible.
+              </p>
+              <button id="settings-delete-account-btn" class="btn btn-danger-pill">
+                Delete Account &amp; Wipe Everything
+              </button>
+            </div>
+          </div>
+
+        </div><!-- /settings-grid -->
       </div>
-
-      <!-- Input Row -->
-      <div class="input-row" role="group" aria-label="Message input">
-        <textarea
-          id="chat-input"
-          placeholder="Ask Larvi to manage your emails or calendar…"
-          rows="1"
-          aria-label="Type your message"
-          autocomplete="off"
-          spellcheck="true"
-        ></textarea>
-        <button id="send-btn" aria-label="Send message" title="Send (Enter)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
-        </button>
-      </div>
-    </div><!-- /chat-input-dock -->
+    </div>
 
   </main><!-- /main-panel -->
 

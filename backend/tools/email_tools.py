@@ -67,15 +67,37 @@ def read_email(message_id: str) -> str:
         return json.dumps({"status": "error", "message": str(e)})
 
 
+from typing import Any, Union
+
+
 @tool
-def get_recent_emails(count: int = 10) -> str:
+def get_recent_emails(count: Union[int, str, Any] = 10) -> str:
     """
     Get the most recent emails from the inbox.
     Use when user asks 'show me my latest emails' or 'what's in my inbox'.
     Count can be 1-20.
     """
     try:
-        emails = list_recent_emails(count=min(count, 20))
+        parsed_count = 10
+        if isinstance(count, dict):
+            parsed_count = int(count.get("count", 10))
+        elif isinstance(count, str):
+            c_str = count.strip()
+            if c_str.startswith("{"):
+                try:
+                    data = json.loads(c_str)
+                    parsed_count = int(data.get("count", 10))
+                except Exception:
+                    parsed_count = 10
+            else:
+                try:
+                    parsed_count = int(c_str)
+                except Exception:
+                    parsed_count = 10
+        elif isinstance(count, int):
+            parsed_count = count
+
+        emails = list_recent_emails(count=min(max(parsed_count, 1), 20))
         if not emails:
             return json.dumps({"status": "empty", "message": "No emails found in inbox.", "emails": []})
         # Return summaries for context efficiency

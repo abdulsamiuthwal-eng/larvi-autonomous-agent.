@@ -154,3 +154,26 @@ def delete_session(session_id: str) -> bool:
         cursor.execute("DELETE FROM sessions WHERE id = ?", (session_id,))
         conn.commit()
         return cursor.rowcount > 0
+
+
+def clear_all_db_data() -> None:
+    """Wipe all sessions and messages from the database."""
+    init_db()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM messages")
+        cursor.execute("DELETE FROM sessions")
+        conn.commit()
+
+
+def get_db_stats() -> dict:
+    """Get count of sessions and messages stored in the database."""
+    init_db()
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) as cnt FROM sessions")
+        s_count = cursor.fetchone()["cnt"]
+        cursor.execute("SELECT COUNT(*) as cnt FROM messages")
+        m_count = cursor.fetchone()["cnt"]
+        return {"total_sessions": s_count, "total_messages": m_count}
+

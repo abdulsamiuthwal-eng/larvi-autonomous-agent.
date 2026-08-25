@@ -32,6 +32,8 @@ from memory.db import (
     get_all_sessions,
     get_session_messages,
     delete_session,
+    clear_all_db_data,
+    get_db_stats,
 )
 from auth.google_oauth import (
     run_oauth_flow,
@@ -41,6 +43,8 @@ from auth.google_oauth import (
     get_authorization_url,
     exchange_code_for_credentials,
 )
+from services.gmail_service import list_recent_emails
+from services.gcal_service import get_upcoming_events
 
 # Initialize SQLite database
 init_db()
@@ -67,6 +71,8 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        "https://larvi-autonomous-agent.vercel.app",
+        "https://*.vercel.app",
         "null",
     ],
     allow_credentials=True,
@@ -366,6 +372,65 @@ async def clear_session(session_id: str):
     delete_session(session_id)
     session_manager.delete(session_id)
     return {"status": "cleared", "session_id": session_id}
+
+
+@app.get("/emails/list")
+async def get_recent_emails_endpoint(session_id: Optional[str] = None):
+    """Retrieve recent emails from Gmail for the inbox dashboard."""
+    try:
+        emails = list_recent_emails(max_results=10, session_id=session_id)
+        return {"status": "success", "count": len(emails), "emails": emails}
+    except Exception as e:
+        return {"status": "error", "message": str(e), "emails": []}
+
+
+@app.get("/calendar/list")
+async def get_recent_events_endpoint(session_id: Optional[str] = None):
+    """Retrieve upcoming calendar events for the schedule dashboard."""
+    try:
+        events = get_upcoming_events(days_ahead=7, session_id=session_id)
+        return {"status": "success", "count": len(events), "events": events}
+    except Exception as e:
+        return {"status": "error", "message": str(e), "events": []}
+
+
+@app.get("/settings/stats")
+async def get_settings_stats(session_id: Optional[str] = None):
+    """Get system stats, database metrics, and authentication state."""
+    db_stats = get_db_stats()
+    auth_status = get_auth_status(session_id)
+    return {
+        "status": "ok",
+        "service": "Larvi AI Agent",
+        "version": "1.0.0",
+        "ai_model": "Gemini 2.5/3.5 Fallback Cascade",
+        "db_stats": db_stats,
+        "auth": auth_status,
+    }
+
+
+@app.post("/settings/clear-all")
+async def clear_all_data_endpoint():
+    """Clear all chat sessions, messages, and working memory from database."""
+    clear_all_db_data()
+    session_manager.sessions.clear()
+    return {"status": "cleared", "message": "All conversations and memories deleted."}
+
+
+@app.post("/auth/logout")
+async def logout_endpoint(session_id: Optional[str] = None):
+    """Disconnect Google account and clear session token."""
+    from auth.google_oauth import _session_credentials, _session_userinfo, _get_token_path
+    if session_id:
+        _session_credentials.pop(session_id, None)
+        _session_userinfo.pop(session_id, None)
+        token_path = _get_token_path(session_id)
+        if token_path.exists():
+            try:
+                token_path.unlink()
+            except Exception:
+                pass
+    return {"status": "logged_out", "message": "Google account disconnected successfully."}
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────

@@ -190,13 +190,69 @@ async function deleteSessionApi(sessionId) {
 }
 
 /**
- * Clear a session.
+ * Fetch recent emails for inbox view.
  */
-async function clearSession(sessionId) {
+async function fetchRecentEmails(sessionId) {
   try {
-    await fetch(`${API_BASE}/session/${sessionId}`, { method: 'DELETE' });
+    const url = sessionId ? `${API_BASE}/emails/list?session_id=${sessionId}` : `${API_BASE}/emails/list`;
+    const res = await fetch(url);
+    if (!res.ok) return { status: 'error', emails: [] };
+    return res.json();
   } catch {
-    // Ignore
+    return { status: 'error', emails: [] };
+  }
+}
+
+/**
+ * Fetch upcoming calendar events for schedule view.
+ */
+async function fetchCalendarEvents(sessionId) {
+  try {
+    const url = sessionId ? `${API_BASE}/calendar/list?session_id=${sessionId}` : `${API_BASE}/calendar/list`;
+    const res = await fetch(url);
+    if (!res.ok) return { status: 'error', events: [] };
+    return res.json();
+  } catch {
+    return { status: 'error', events: [] };
+  }
+}
+
+/**
+ * Fetch settings metrics and database telemetry.
+ */
+async function fetchSettingsStats(sessionId) {
+  try {
+    const url = sessionId ? `${API_BASE}/settings/stats?session_id=${sessionId}` : `${API_BASE}/settings/stats`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Clear all data from SQLite database.
+ */
+async function clearAllDataApi() {
+  try {
+    const res = await fetch(`${API_BASE}/settings/clear-all`, { method: 'POST' });
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Disconnect Google Account.
+ */
+async function logoutGoogleApi(sessionId) {
+  try {
+    const url = sessionId ? `${API_BASE}/auth/logout?session_id=${sessionId}` : `${API_BASE}/auth/logout`;
+    const res = await fetch(url, { method: 'POST' });
+    return res.json();
+  } catch {
+    return null;
   }
 }
 
@@ -208,9 +264,13 @@ export {
   getLoginUrl,
   checkHealth,
   getSessionMemory,
-  clearSession,
   fetchSessions,
   fetchSessionHistory,
   createNewSessionApi,
   deleteSessionApi,
+  fetchRecentEmails,
+  fetchCalendarEvents,
+  fetchSettingsStats,
+  clearAllDataApi,
+  logoutGoogleApi,
 };
