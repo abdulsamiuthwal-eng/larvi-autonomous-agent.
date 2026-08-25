@@ -3,6 +3,15 @@ Larvi — FastAPI Application Server (Multi-User & Session-Aware)
 Main entry point for the Larvi backend API.
 Handles chat, multi-user authentication, and health endpoints.
 """
+import sys
+import os
+from pathlib import Path
+
+# Ensure backend directory is in Python path for Vercel / serverless runtime
+BACKEND_DIR = Path(__file__).resolve().parent
+if str(BACKEND_DIR) not in sys.path:
+    sys.path.insert(0, str(BACKEND_DIR))
+
 import uuid
 import json
 import asyncio

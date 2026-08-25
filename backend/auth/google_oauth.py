@@ -16,7 +16,10 @@ from googleapiclient.discovery import build
 from config import settings, BASE_DIR
 
 # Tokens directory for per-session token storage
-TOKENS_DIR = BASE_DIR / "tokens"
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    TOKENS_DIR = Path("/tmp/tokens")
+else:
+    TOKENS_DIR = BASE_DIR / "tokens"
 TOKENS_DIR.mkdir(exist_ok=True)
 
 # In-memory credentials cache: session_id -> Credentials

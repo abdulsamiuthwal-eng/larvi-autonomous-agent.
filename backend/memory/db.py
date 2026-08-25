@@ -3,6 +3,7 @@ Larvi — SQLite Persistent Database
 Stores conversation history, multi-chat sessions, and working memory
 permanently across page reloads and browser sessions.
 """
+import os
 import sqlite3
 import json
 import uuid
@@ -10,7 +11,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-DB_PATH = Path(__file__).resolve().parent.parent / "larvi.db"
+# On Vercel / serverless cloud, write SQLite database to /tmp
+if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+    DB_PATH = Path("/tmp/larvi.db")
+else:
+    DB_PATH = Path(__file__).resolve().parent.parent / "larvi.db"
 
 
 def get_db_connection():
