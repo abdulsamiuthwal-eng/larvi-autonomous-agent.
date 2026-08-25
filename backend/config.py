@@ -22,6 +22,10 @@ class Settings:
         "GOOGLE_CREDENTIALS_PATH", "credentials.json"
     )
     GOOGLE_TOKEN_PATH: str = os.getenv("GOOGLE_TOKEN_PATH", "token.json")
+    # Direct env-var credentials (used on Vercel where credentials.json is absent)
+    GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
+    GOOGLE_REDIRECT_URI: str = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/auth/callback")
 
     # Gmail + Calendar + UserInfo OAuth scopes
     GOOGLE_SCOPES: list[str] = [

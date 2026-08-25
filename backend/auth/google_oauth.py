@@ -113,16 +113,41 @@ def is_authenticated(session_id: Optional[str] = None) -> bool:
 # ── Web OAuth Flow (Multi-User) ───────────────────────────────────────────────
 
 def create_web_flow(redirect_uri: str) -> Flow:
-    """Create a Google OAuth Flow object configured with Web redirect URI."""
+    """
+    Create a Google OAuth Flow for web redirect URI.
+    Uses credentials.json if present (local dev), otherwise falls back to
+    GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET env vars (Vercel production).
+    """
     credentials_path = BASE_DIR / settings.GOOGLE_CREDENTIALS_PATH
-    if not credentials_path.exists():
-        raise FileNotFoundError(
-            f"credentials.json not found at {credentials_path}.\n"
-            "Please download Desktop or Web credentials from Google Cloud Console."
+
+    if credentials_path.exists():
+        # Local development: load from file
+        return Flow.from_client_secrets_file(
+            str(credentials_path),
+            scopes=settings.GOOGLE_SCOPES,
+            redirect_uri=redirect_uri,
         )
 
-    return Flow.from_client_secrets_file(
-        str(credentials_path),
+    # Vercel / serverless: build config from environment variables
+    client_id     = settings.GOOGLE_CLIENT_ID
+    client_secret = settings.GOOGLE_CLIENT_SECRET
+    if not client_id or not client_secret:
+        raise EnvironmentError(
+            "credentials.json not found and GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET "
+            "env vars are not set. Cannot start OAuth flow."
+        )
+
+    client_config = {
+        "web": {
+            "client_id":     client_id,
+            "client_secret": client_secret,
+            "auth_uri":      "https://accounts.google.com/o/oauth2/auth",
+            "token_uri":     "https://oauth2.googleapis.com/token",
+            "redirect_uris": [redirect_uri],
+        }
+    }
+    return Flow.from_client_config(
+        client_config,
         scopes=settings.GOOGLE_SCOPES,
         redirect_uri=redirect_uri,
     )
