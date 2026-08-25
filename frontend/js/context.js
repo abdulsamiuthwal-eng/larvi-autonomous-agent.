@@ -143,10 +143,100 @@ class LarviContext {
       if (calSub)   calSub.textContent   = 'Not authenticated';
     }
 
-    // User profile area
-    const userEmail = document.getElementById('user-email-display');
-    if (userEmail && authData.email) {
-      userEmail.textContent = authData.email;
+    // ── Sidebar User Profile Strip & View Updates ────────────────
+    const userNameEl = document.getElementById('user-name-display');
+    const userEmailEl = document.getElementById('user-email-display');
+    const userAvatarEl = document.getElementById('user-avatar');
+    const userPicEl = document.getElementById('user-profile-pic');
+    const upStatusDot = document.getElementById('up-status-dot');
+
+    // Profile View Elements
+    const heroName = document.getElementById('profile-name-display');
+    const heroEmail = document.getElementById('profile-email-hero');
+    const heroAvatarStatus = document.getElementById('profile-avatar-status');
+    const heroPicLarge = document.getElementById('profile-pic-large');
+    const heroInitialLarge = document.getElementById('profile-initial-large');
+    const pfName = document.getElementById('pf-name');
+    const pfEmail = document.getElementById('pf-email');
+    const pfGmailStatus = document.getElementById('pf-gmail-status');
+    const pfCalStatus = document.getElementById('pf-cal-status');
+    const pfTokenStatus = document.getElementById('pf-token-status');
+
+    if (authData.authenticated) {
+      const email = authData.email || 'user@gmail.com';
+      const name = authData.name || email.split('@')[0];
+      const initial = (name || email)[0].toUpperCase();
+
+      // Sidebar Profile Strip
+      if (userNameEl) userNameEl.textContent = name;
+      if (userEmailEl) userEmailEl.textContent = email;
+      if (upStatusDot) {
+        upStatusDot.className = 'up-status-dot online';
+      }
+
+      if (authData.picture && userPicEl) {
+        userPicEl.src = authData.picture;
+        userPicEl.style.display = 'block';
+        if (userAvatarEl) userAvatarEl.style.display = 'none';
+      } else if (userAvatarEl) {
+        userAvatarEl.textContent = initial;
+        userAvatarEl.style.display = 'flex';
+        if (userPicEl) userPicEl.style.display = 'none';
+      }
+
+      // Profile Page View
+      if (heroName) heroName.textContent = name;
+      if (heroEmail) heroEmail.textContent = email;
+      if (heroAvatarStatus) {
+        heroAvatarStatus.textContent = '● Online & Connected';
+        heroAvatarStatus.className = 'profile-avatar-status online';
+      }
+
+      if (authData.picture && heroPicLarge) {
+        heroPicLarge.src = authData.picture;
+        heroPicLarge.style.display = 'block';
+        if (heroInitialLarge) heroInitialLarge.style.display = 'none';
+      } else if (heroInitialLarge) {
+        heroInitialLarge.textContent = initial;
+        heroInitialLarge.style.display = 'flex';
+        if (heroPicLarge) heroPicLarge.style.display = 'none';
+      }
+
+      if (pfName) pfName.textContent = name;
+      if (pfEmail) pfEmail.textContent = email;
+      if (pfGmailStatus) pfGmailStatus.innerHTML = '<span class="status-chip connected">Active & Linked</span>';
+      if (pfCalStatus) pfCalStatus.innerHTML = '<span class="status-chip connected">Active & Linked</span>';
+      if (pfTokenStatus) pfTokenStatus.innerHTML = '<span class="status-chip connected">Valid & Refreshing</span>';
+
+    } else {
+      // Sidebar Profile Strip (Offline)
+      if (userNameEl) userNameEl.textContent = 'Larvi User';
+      if (userEmailEl) userEmailEl.textContent = 'Not connected';
+      if (upStatusDot) upStatusDot.className = 'up-status-dot offline';
+      if (userAvatarEl) {
+        userAvatarEl.textContent = 'U';
+        userAvatarEl.style.display = 'flex';
+      }
+      if (userPicEl) userPicEl.style.display = 'none';
+
+      // Profile Page View (Offline)
+      if (heroName) heroName.textContent = 'Larvi User';
+      if (heroEmail) heroEmail.textContent = 'Not connected';
+      if (heroAvatarStatus) {
+        heroAvatarStatus.textContent = '● Offline (Not Connected)';
+        heroAvatarStatus.className = 'profile-avatar-status';
+      }
+      if (heroInitialLarge) {
+        heroInitialLarge.textContent = 'U';
+        heroInitialLarge.style.display = 'flex';
+      }
+      if (heroPicLarge) heroPicLarge.style.display = 'none';
+
+      if (pfName) pfName.textContent = '—';
+      if (pfEmail) pfEmail.textContent = '—';
+      if (pfGmailStatus) pfGmailStatus.innerHTML = '<span class="status-chip disconnected">Disconnected</span>';
+      if (pfCalStatus) pfCalStatus.innerHTML = '<span class="status-chip disconnected">Disconnected</span>';
+      if (pfTokenStatus) pfTokenStatus.innerHTML = '<span class="status-chip disconnected">Not issued</span>';
     }
   }
 }

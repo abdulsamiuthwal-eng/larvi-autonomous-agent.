@@ -223,6 +223,7 @@ def get_auth_status(session_id: Optional[str] = None) -> dict:
         "calendar_connected": True,
         "email": user_info.get("email", ""),
         "name": user_info.get("name", ""),
+        "picture": user_info.get("picture", ""),
         "session_id": session_id,
         "token_valid": creds.valid,
         "message": f"Connected as {user_info.get('email', 'Google Account')}",
