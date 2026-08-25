@@ -17,19 +17,56 @@ from services.gcal_service import (
 )
 
 
+from typing import Any, Union
+
+
+def _try_unpack_json(val: Any) -> dict:
+    """Helper to unpack LLM-stringified JSON argument dictionaries."""
+    if isinstance(val, dict):
+        return val
+    if isinstance(val, str) and val.strip().startswith("{") and val.strip().endswith("}"):
+        try:
+            return json.loads(val)
+        except Exception:
+            pass
+    return {}
+
+
+def _parse_int_arg(val: Any, default: int = 7) -> int:
+    """Safely parse integer arguments from int, string, or json-stringified inputs."""
+    if isinstance(val, int):
+        return val
+    if isinstance(val, dict):
+        return int(val.get("days_ahead", default))
+    if isinstance(val, str):
+        val_str = val.strip()
+        if val_str.startswith("{") and val_str.endswith("}"):
+            try:
+                d = json.loads(val_str)
+                return int(d.get("days_ahead", default))
+            except Exception:
+                pass
+        try:
+            return int(val_str)
+        except ValueError:
+            return default
+    return default
+
+
 @tool
-def get_events(days_ahead: int = 7) -> str:
+def get_events(days_ahead: Union[int, str, Any] = 7) -> str:
     """
     Get upcoming calendar events for the next N days.
     Use when user asks 'what meetings do I have', 'show my schedule', or 'what's happening today/tomorrow'.
     days_ahead: Number of days to look ahead (1=today, 2=tomorrow, 7=this week)
     """
     try:
-        events = get_upcoming_events(days_ahead=days_ahead)
+        parsed_days = _parse_int_arg(days_ahead, default=7)
+        events = get_upcoming_events(days_ahead=parsed_days)
         if not events:
             return json.dumps({
                 "status": "empty",
-                "message": f"No events found in the next {days_ahead} day(s).",
+                "message": f"No events found in the next {parsed_days} day(s).",
                 "events": [],
             })
         return json.dumps({"status": "success", "count": len(events), "events": events})
@@ -38,13 +75,19 @@ def get_events(days_ahead: int = 7) -> str:
 
 
 @tool
-def search_events(query: str) -> str:
+def search_events(query: Union[str, Any]) -> str:
     """
     Search calendar events by keyword or topic.
     Use when user asks about a specific meeting by name or topic.
     Examples: 'project meeting', 'standup', 'interview with Ali'
     """
     try:
+        unpacked = _try_unpack_json(query)
+        if unpacked:
+            query = unpacked.get("query", str(query))
+        elif not isinstance(query, str):
+            query = str(query)
+
         events = search_calendar_events(query=query)
         if not events:
             return json.dumps({
@@ -55,16 +98,6 @@ def search_events(query: str) -> str:
         return json.dumps({"status": "success", "count": len(events), "events": events})
     except Exception as e:
         return json.dumps({"status": "error", "message": str(e)})
-
-
-def _try_unpack_json(val: str) -> dict:
-    """Helper to unpack LLM-stringified JSON argument dictionaries."""
-    if isinstance(val, str) and val.strip().startswith("{") and val.strip().endswith("}"):
-        try:
-            return json.loads(val)
-        except Exception:
-            pass
-    return {}
 
 
 @tool

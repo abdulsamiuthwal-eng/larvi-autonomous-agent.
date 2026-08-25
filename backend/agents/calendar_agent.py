@@ -15,7 +15,12 @@ from tools.calendar_tools import ALL_CALENDAR_TOOLS
 from memory.context_manager import Session
 
 
+from datetime import datetime
+
+
 CALENDAR_AGENT_PROMPT = PromptTemplate.from_template("""You are Larvi's Calendar Agent — a specialized AI assistant for managing Google Calendar.
+
+Today's Date & Time: {current_datetime}
 
 Your capabilities:
 - View upcoming calendar events
@@ -25,17 +30,18 @@ Your capabilities:
 - Update/reschedule existing events
 - Delete events (ONLY after user explicitly confirms)
 
-IMPORTANT SAFETY RULES:
-1. ALWAYS call check_availability before creating any new event.
-2. NEVER delete an event without explicit user confirmation.
-3. For rescheduling, always check the new slot's availability first.
-4. If a conflict is detected, inform the user and suggest alternatives.
-5. When creating events from email info, verify all details (date, time, title) before proceeding.
+IMPORTANT SAFETY & DATE RULES:
+1. Today's live date is {current_datetime}. When the user says "today", "tomorrow", or "next week", ALWAYS calculate relative to this live date. Never use 2024 or outdated years.
+2. ALWAYS call check_availability before creating any new event.
+3. NEVER delete an event without explicit user confirmation.
+4. For rescheduling, always check the new slot's availability first.
+5. If a conflict is detected, inform the user and suggest alternatives.
+6. When creating events from email info, verify all details (date, time, title) before proceeding.
 
 DATE/TIME FORMAT:
-- Dates: YYYY-MM-DD (e.g., 2024-01-15)
-- Times: HH:MM in 24-hour format (e.g., 14:00 for 2 PM, 17:00 for 5 PM)
-- Today's context: If user says "tomorrow", calculate the actual date.
+- Dates: YYYY-MM-DD (e.g., 2026-08-26)
+- Times: HH:MM in 24-hour format (e.g., 10:00 for 10 AM, 14:00 for 2 PM, 17:00 for 5 PM)
+- Tool Inputs: Pass standard primitive values (e.g., days_ahead=2 as number or string). Do not enclose simple parameters in JSON unless requested.
 
 Current working memory context:
 {working_memory}
@@ -80,6 +86,7 @@ def run_calendar_agent(task: str, session: Session) -> dict:
     """
     working_memory_ctx = session.working_memory.get_context_summary()
     chat_history = _format_chat_history(session.get_history_for_llm())
+    current_dt = datetime.now().strftime("%Y-%m-%d %H:%M (%A)")
 
     def _execute_agent(model_name: str):
         llm = get_llm(temperature=0.1, model=model_name)
@@ -98,6 +105,7 @@ def run_calendar_agent(task: str, session: Session) -> dict:
         )
         return executor.invoke({
             "input": task,
+            "current_datetime": current_dt,
             "working_memory": working_memory_ctx or "No previous context.",
             "chat_history": chat_history,
         })

@@ -15,7 +15,12 @@ from tools.email_tools import ALL_EMAIL_TOOLS
 from memory.context_manager import Session
 
 
+from datetime import datetime
+
+
 EMAIL_AGENT_PROMPT = PromptTemplate.from_template("""You are Larvi's Email Agent — a specialized AI assistant for managing Gmail.
+
+Today's Date & Time: {current_datetime}
 
 Your capabilities:
 - Search emails by sender, subject, keywords, or any Gmail operator
@@ -26,10 +31,11 @@ Your capabilities:
 - Reply to emails (ONLY after user explicitly confirms)
 
 IMPORTANT SAFETY RULES:
-1. NEVER send or reply to emails without explicit user confirmation.
-2. If asked to send/reply, create a draft first and ask user to confirm.
-3. Always be honest — if an email is not found, say so clearly.
-4. Extract and return useful information (dates, times, names, meeting details) from emails.
+1. Today's live date is {current_datetime}. When dates/times are mentioned, calculate relative to this live date.
+2. NEVER send or reply to emails without explicit user confirmation.
+3. If asked to send/reply, create a draft first and ask user to confirm.
+4. Always be honest — if an email is not found, say so clearly.
+5. Extract and return useful information (dates, times, names, meeting details) from emails.
 
 Current working memory context:
 {working_memory}
@@ -74,6 +80,7 @@ def run_email_agent(task: str, session: Session) -> dict:
     """
     working_memory_ctx = session.working_memory.get_context_summary()
     chat_history = _format_chat_history(session.get_history_for_llm())
+    current_dt = datetime.now().strftime("%Y-%m-%d %H:%M (%A)")
 
     def _execute_agent(model_name: str):
         llm = get_llm(temperature=0.1, model=model_name)
@@ -92,6 +99,7 @@ def run_email_agent(task: str, session: Session) -> dict:
         )
         return executor.invoke({
             "input": task,
+            "current_datetime": current_dt,
             "working_memory": working_memory_ctx or "No previous context.",
             "chat_history": chat_history,
         })
