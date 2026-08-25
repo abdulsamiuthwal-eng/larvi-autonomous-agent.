@@ -1,0 +1,575 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LARVI — Chat Interface Styles
+   Message bubbles, agent cards, email/event widgets, typing indicator
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Welcome Screen ────────────────────────────────────────────── */
+#welcome-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex: 1;
+  padding: var(--space-12);
+  gap: var(--space-6);
+}
+
+#welcome-logo {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--color-accent) 0%, #EA580C 100%);
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(194,65,12,.25);
+}
+
+#welcome-logo svg { width: 32px; height: 32px; color: white; }
+
+#welcome-title {
+  font-size: var(--font-2xl);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--color-text-primary);
+}
+
+#welcome-subtitle {
+  font-size: var(--font-md);
+  color: var(--color-text-muted);
+  max-width: 380px;
+  line-height: 1.7;
+}
+
+.welcome-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: center;
+  max-width: 480px;
+}
+
+.welcome-chip {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-weight: 500;
+}
+
+.welcome-chip:hover {
+  background: var(--color-accent-pale);
+  border-color: var(--color-accent-border);
+  color: var(--color-accent);
+}
+
+/* ── Message Wrapper ───────────────────────────────────────────── */
+.message-group {
+  display: flex;
+  gap: var(--space-3);
+  max-width: 780px;
+  width: 100%;
+  animation: messageIn 200ms ease-out both;
+}
+
+@keyframes messageIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* User Message — right aligned */
+.message-group.user {
+  margin-left: auto;
+  flex-direction: row-reverse;
+  max-width: 600px;
+}
+
+/* Larvi Message — left aligned */
+.message-group.larvi {
+  margin-right: auto;
+}
+
+/* ── Avatar ────────────────────────────────────────────────────── */
+.msg-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.msg-avatar.larvi-avatar {
+  background: linear-gradient(135deg, var(--color-accent) 0%, #EA580C 100%);
+  color: white;
+}
+
+.msg-avatar.user-avatar {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--font-sm);
+}
+
+/* ── Message Body Container ────────────────────────────────────── */
+.msg-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* ── User Bubble ───────────────────────────────────────────────── */
+.user-bubble {
+  background: var(--color-accent);
+  color: white;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg) var(--radius-sm) var(--radius-lg) var(--radius-lg);
+  font-size: var(--font-base);
+  line-height: 1.65;
+  align-self: flex-end;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+/* ── Larvi Response Card ───────────────────────────────────────── */
+.larvi-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm) var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* Agent identifier header bar */
+.larvi-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-surface-2);
+  border-bottom: 1px solid var(--color-border-faint);
+  gap: var(--space-3);
+}
+
+.agent-badge-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.msg-timestamp {
+  font-size: 10px;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+}
+
+/* ── Tool Call Pills ───────────────────────────────────────────── */
+.tool-calls-section {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border-faint);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tool-call-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border-faint);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  font-family: 'SF Mono', 'Cascadia Code', monospace;
+}
+
+.tool-call-pill .tool-icon {
+  font-size: 11px;
+}
+
+.tool-call-pill .tool-status-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-emerald-light);
+  flex-shrink: 0;
+}
+
+/* ── Response Text Body ────────────────────────────────────────── */
+.larvi-card-body {
+  padding: var(--space-4);
+  font-size: var(--font-base);
+  line-height: 1.75;
+  color: var(--color-text-primary);
+}
+
+.larvi-card-body p + p { margin-top: var(--space-3); }
+.larvi-card-body strong { font-weight: 600; }
+.larvi-card-body em { font-style: italic; color: var(--color-text-secondary); }
+
+/* ── Embedded Email Card Widget ────────────────────────────────── */
+.email-widget {
+  margin: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-canvas);
+}
+
+.email-widget-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.email-sender-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-accent-pale);
+  color: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-xs);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.email-meta { flex: 1; min-width: 0; }
+.email-sender-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.email-date {
+  font-size: var(--font-xs);
+  color: var(--color-text-faint);
+}
+
+.email-widget-subject {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.email-widget-snippet {
+  padding: 0 var(--space-4) var(--space-3);
+  font-size: var(--font-sm);
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.email-widget-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+/* ── Embedded Calendar Event Card Widget ───────────────────────── */
+.event-widget {
+  margin: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-canvas);
+}
+
+.event-widget-accent-bar {
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-light));
+}
+
+.event-widget-body {
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.event-date-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--color-accent-pale);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.event-date-day {
+  font-size: var(--font-xl);
+  font-weight: 800;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.event-date-mon {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+}
+
+.event-details { flex: 1; min-width: 0; }
+
+.event-title {
+  font-size: var(--font-md);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-time {
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.event-attendees {
+  margin-top: var(--space-2);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.attendee-chip {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.event-widget-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-4) var(--space-3);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.event-action-bar {
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* ── Interactive Email Draft Composer Card ─────────────────────── */
+.draft-widget {
+  margin: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-canvas);
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.draft-widget:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-md);
+}
+
+.draft-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.draft-row {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border-subtle);
+  font-size: var(--font-sm);
+}
+
+.draft-label {
+  width: 60px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.draft-val {
+  flex: 1;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.draft-body-preview {
+  padding: var(--space-3);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  background: var(--color-surface);
+  border-radius: var(--radius-sm);
+  margin: var(--space-2) var(--space-3);
+  border: 1px dashed var(--color-border);
+}
+
+.draft-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Safety Confirmation Banner ────────────────────────────────── */
+.confirmation-banner {
+  margin: var(--space-3) var(--space-4) var(--space-4);
+  border: 1px solid var(--color-amber-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-amber-pale);
+  animation: slideDown 200ms ease-out both;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.confirmation-banner-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: rgba(251,191,36,.15);
+  border-bottom: 1px solid var(--color-amber-border);
+  font-size: var(--font-xs);
+  font-weight: 700;
+  color: var(--color-amber);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.confirmation-banner-text {
+  padding: var(--space-3);
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.confirmation-banner-actions {
+  display: flex;
+  gap: var(--space-2);
+  padding: 0 var(--space-3) var(--space-3);
+}
+
+/* ── Typing Indicator ──────────────────────────────────────────── */
+#typing-indicator {
+  display: none;
+  align-items: center;
+  gap: var(--space-3);
+  max-width: 780px;
+  animation: messageIn 200ms ease-out both;
+}
+
+#typing-indicator.visible { display: flex; }
+
+.typing-bubble {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm) var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: var(--shadow-sm);
+}
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-text-faint);
+  animation: typingPulse 1.4s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingPulse {
+  0%, 60%, 100% { transform: translateY(0); opacity: .4; }
+  30%            { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ── Streaming Cursor & Live Tokens ───────────────────────── */
+.streaming-cursor {
+  display: inline-block;
+  width: 7px;
+  height: 15px;
+  background: var(--color-primary);
+  margin-left: 3px;
+  vertical-align: middle;
+  border-radius: 1px;
+  animation: streamBlink 0.7s infinite alternate;
+}
+
+@keyframes streamBlink {
+  0%   { opacity: 0.15; transform: scaleY(0.85); }
+  100% { opacity: 1;    transform: scaleY(1); }
+}
+
+.message-group.larvi.streaming .larvi-card {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+

@@ -1,0 +1,66 @@
+# Larvi — Git Ignore Rules (Senior Security & Clean Repo Standards)
+
+# Python & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# SQLite Databases & Session Cache
+*.db
+*.sqlite
+*.sqlite3
+backend/larvi.db
+backend/larvi.db-journal
+
+# Sensitive Credentials & Tokens (STRICT SECURITY - NEVER COMMIT)
+.env
+backend/.env
+backend/credentials.json
+credentials.json
+backend/token.json
+token.json
+backend/tokens/
+tokens/
+
+# Allow essential config and example files
+!backend/.env.example
+!.env.example
+!vercel.json
+!package.json
+
+# Vercel & Node
+.vercel
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# OS Metadata
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/

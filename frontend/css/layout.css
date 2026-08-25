@@ -1,0 +1,240 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LARVI — 3-Column Application Layout
+   Left Sidebar | Main Chat | Right Context Dock
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── App Shell ─────────────────────────────────────────────────── */
+#app {
+  display: grid;
+  grid-template-columns: var(--sidebar-left-width) 1fr var(--sidebar-right-width);
+  grid-template-rows: 100vh;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: var(--color-canvas);
+}
+
+/* ── Left Sidebar ──────────────────────────────────────────────── */
+#sidebar-left {
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+/* ── Center Panel (Main) ───────────────────────────────────────── */
+#main-panel {
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-canvas);
+  overflow: hidden;
+  position: relative;
+}
+
+#main-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-4) var(--space-6);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  height: 60px;
+  gap: var(--space-4);
+}
+
+#chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  scroll-behavior: smooth;
+}
+
+#chat-input-dock {
+  flex-shrink: 0;
+  padding: var(--space-4) var(--space-6) var(--space-5);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ── Right Sidebar ─────────────────────────────────────────────── */
+#sidebar-right {
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  overflow-y: auto;
+}
+
+/* ── Sidebar Section Header ────────────────────────────────────── */
+.sidebar-section {
+  padding: var(--space-4) var(--space-5);
+}
+
+.sidebar-section + .sidebar-section {
+  border-top: 1px solid var(--color-border-faint);
+}
+
+.sidebar-section-label {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-3);
+}
+
+/* ── Top Header within Left Sidebar ───────────────────────────── */
+#brand-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  border-bottom: 1px solid var(--color-border-faint);
+  flex-shrink: 0;
+}
+
+#brand-logo {
+  width: 34px;
+  height: 34px;
+  background: var(--color-accent);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+#brand-logo svg {
+  width: 18px;
+  height: 18px;
+  color: white;
+}
+
+#brand-name {
+  font-size: var(--font-lg);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+#brand-version {
+  font-size: var(--font-xs);
+  color: var(--color-text-faint);
+  font-weight: 500;
+  margin-top: 1px;
+}
+
+/* ── Navigation ────────────────────────────────────────────────── */
+#nav-list {
+  list-style: none;
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--color-text-muted);
+  font-size: var(--font-sm);
+  font-weight: 500;
+  user-select: none;
+}
+
+.nav-item:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+}
+
+.nav-item.active {
+  background: var(--color-accent-pale);
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.nav-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Active indicator bar */
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 3px;
+  height: 20px;
+  background: var(--color-accent);
+  border-radius: 0 2px 2px 0;
+}
+
+#nav-list { position: relative; }
+.nav-item { position: relative; }
+
+/* ── User Profile Footer (Left Sidebar) ────────────────────────── */
+#user-profile {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border-faint);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  margin-top: auto;
+  background: var(--color-surface);
+}
+
+#user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+#user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+#user-email {
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#user-status {
+  font-size: 10px;
+  color: var(--color-emerald);
+  font-weight: 600;
+}

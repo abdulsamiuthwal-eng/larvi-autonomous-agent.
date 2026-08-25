@@ -1,0 +1,294 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LARVI — Design System & CSS Reset
+   Warm Editorial Palette · Plus Jakarta Sans · 8pt Grid
+   No black, purple, or blue.
+   ═══════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+/* ── Design Tokens ─────────────────────────────────────────────── */
+:root {
+  /* Canvas & Surfaces */
+  --color-canvas:       #F7F6F2;
+  --color-surface:      #FFFFFF;
+  --color-surface-2:    #EFECE6;
+  --color-surface-3:    #E8E4DC;
+  --color-surface-hover:#F0EDE7;
+
+  /* Typography */
+  --color-text-primary: #1C1917;
+  --color-text-secondary:#44403C;
+  --color-text-muted:   #78716C;
+  --color-text-faint:   #A8A29E;
+
+  /* Accent — Burnished Copper / Terracotta */
+  --color-accent:       #C2410C;
+  --color-accent-light: #EA580C;
+  --color-accent-pale:  #FFF1ED;
+  --color-accent-border:#FDDDD4;
+
+  /* Warm Amber / Ochre */
+  --color-amber:        #D97706;
+  --color-amber-light:  #F59E0B;
+  --color-amber-pale:   #FFFBEB;
+  --color-amber-border: #FDE68A;
+
+  /* Forest Emerald — Success */
+  --color-emerald:      #15803D;
+  --color-emerald-light:#16A34A;
+  --color-emerald-pale: #F0FDF4;
+  --color-emerald-border:#BBF7D0;
+
+  /* Rose / Error */
+  --color-rose:         #BE123C;
+  --color-rose-pale:    #FFF1F2;
+  --color-rose-border:  #FECDD3;
+
+  /* Borders & Dividers */
+  --color-border:       #E7E5E4;
+  --color-border-strong:#D6D3D1;
+  --color-border-faint: #F5F5F4;
+
+  /* Shadows — warm-tinted, no harsh black */
+  --shadow-xs:  0 1px 2px rgba(28,25,23,.04);
+  --shadow-sm:  0 1px 3px rgba(28,25,23,.06), 0 1px 2px rgba(28,25,23,.04);
+  --shadow-md:  0 4px 6px rgba(28,25,23,.05), 0 2px 4px rgba(28,25,23,.04);
+  --shadow-lg:  0 10px 15px rgba(28,25,23,.06), 0 4px 6px rgba(28,25,23,.04);
+  --shadow-xl:  0 20px 25px rgba(28,25,23,.08), 0 8px 10px rgba(28,25,23,.04);
+
+  /* Typography Scale */
+  --font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-xs:     11px;
+  --font-sm:     12px;
+  --font-base:   14px;
+  --font-md:     15px;
+  --font-lg:     17px;
+  --font-xl:     20px;
+  --font-2xl:    24px;
+  --font-3xl:    30px;
+
+  /* Spacing — 8pt Grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Border Radius */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  18px;
+  --radius-full:9999px;
+
+  /* Transitions */
+  --transition-fast: 120ms ease-out;
+  --transition-base: 180ms ease-out;
+  --transition-slow: 280ms ease-out;
+
+  /* Sidebar widths */
+  --sidebar-left-width:  260px;
+  --sidebar-right-width: 340px;
+}
+
+/* ── Reset ─────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-base);
+  color: var(--color-text-primary);
+  background-color: var(--color-canvas);
+  line-height: 1.6;
+  overflow: hidden;
+  height: 100vh;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-faint); }
+
+/* ── Typography Utilities ──────────────────────────────────────── */
+.text-xs     { font-size: var(--font-xs); }
+.text-sm     { font-size: var(--font-sm); }
+.text-base   { font-size: var(--font-base); }
+.text-md     { font-size: var(--font-md); }
+.text-lg     { font-size: var(--font-lg); }
+.text-xl     { font-size: var(--font-xl); }
+
+.font-normal  { font-weight: 400; }
+.font-medium  { font-weight: 500; }
+.font-semibold{ font-weight: 600; }
+.font-bold    { font-weight: 700; }
+
+.text-primary   { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted     { color: var(--color-text-muted); }
+.text-faint     { color: var(--color-text-faint); }
+.text-accent    { color: var(--color-accent); }
+.text-emerald   { color: var(--color-emerald); }
+.text-amber     { color: var(--color-amber); }
+
+/* ── Badge / Pill Utilities ────────────────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-accent {
+  background: var(--color-accent-pale);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent-border);
+}
+.badge-emerald {
+  background: var(--color-emerald-pale);
+  color: var(--color-emerald);
+  border: 1px solid var(--color-emerald-border);
+}
+.badge-amber {
+  background: var(--color-amber-pale);
+  color: var(--color-amber);
+  border: 1px solid var(--color-amber-border);
+}
+.badge-stone {
+  background: var(--color-surface-2);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+
+/* ── Button Utilities ──────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family);
+  font-size: var(--font-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  border: none;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--color-accent-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border);
+}
+.btn-ghost:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-border-strong);
+}
+
+.btn-danger {
+  background: var(--color-rose);
+  color: #fff;
+}
+.btn-danger:hover { background: #9f1239; }
+
+.btn-sm {
+  padding: 4px 12px;
+  font-size: var(--font-xs);
+  border-radius: var(--radius-sm);
+}
+
+.btn-icon {
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+.btn-icon:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+}
+
+/* ── Card Utility ──────────────────────────────────────────────── */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Divider ───────────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: var(--color-border);
+  margin: var(--space-3) 0;
+}
+
+/* ── Status Dot ────────────────────────────────────────────────── */
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+.status-dot.active   { background: var(--color-emerald-light); }
+.status-dot.syncing  { background: var(--color-amber-light); }
+.status-dot.error    { background: var(--color-rose); }
+.status-dot.inactive { background: var(--color-text-faint); }
+
+/* ── Truncate ──────────────────────────────────────────────────── */
+.truncate {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ── Focus Ring ────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}

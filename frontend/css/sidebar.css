@@ -1,0 +1,485 @@
+/* ═══════════════════════════════════════════════════════════════════
+   LARVI — Sidebar Specific Styles
+   Agent status hub, right context dock, working memory panel
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Agent Status Hub (Left Sidebar) ───────────────────────────── */
+.agent-status-hub {
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid var(--color-border-faint);
+}
+
+.agent-status-hub-title {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-3);
+}
+
+.agent-status-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.agent-status-item + .agent-status-item {
+  border-top: 1px solid var(--color-border-faint);
+}
+
+.agent-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+
+.agent-icon.master { background: var(--color-accent-pale); }
+.agent-icon.email  { background: var(--color-amber-pale); }
+.agent-icon.cal    { background: var(--color-emerald-pale); }
+
+.agent-status-info { flex: 1; min-width: 0; }
+
+.agent-status-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.agent-status-sub {
+  font-size: var(--font-xs);
+  color: var(--color-text-faint);
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Right Sidebar — Working Memory ────────────────────────────── */
+#working-memory-panel {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border-faint);
+}
+
+.memory-title {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-3);
+}
+
+.memory-empty {
+  font-size: var(--font-xs);
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.memory-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  font-size: var(--font-xs);
+  border-top: 1px solid var(--color-border-faint);
+}
+.memory-row:first-of-type { border-top: none; }
+
+.memory-key {
+  color: var(--color-text-faint);
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.memory-value {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* ── Workflow Stepper (Right Sidebar) ──────────────────────────── */
+#workflow-stepper-panel {
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--color-border-faint);
+}
+
+.stepper-empty {
+  font-size: var(--font-xs);
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+
+.stepper-list {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.stepper-item {
+  display: flex;
+  gap: var(--space-3);
+  position: relative;
+  padding-bottom: var(--space-3);
+}
+
+.stepper-item:last-child { padding-bottom: 0; }
+
+/* Vertical connecting line */
+.stepper-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: 0;
+  width: 1px;
+  background: var(--color-border);
+}
+
+.stepper-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  border: 1.5px solid;
+  transition: all var(--transition-base);
+  z-index: 1;
+  background: var(--color-surface);
+}
+
+.stepper-dot.pending {
+  border-color: var(--color-border-strong);
+  color: var(--color-text-faint);
+}
+
+.stepper-dot.in-progress {
+  border-color: var(--color-amber);
+  color: var(--color-amber);
+  animation: stepPulse 1s ease-in-out infinite;
+}
+
+@keyframes stepPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,119,6,.0); }
+  50%       { box-shadow: 0 0 0 4px rgba(217,119,6,.15); }
+}
+
+.stepper-dot.done {
+  border-color: var(--color-emerald);
+  background: var(--color-emerald-pale);
+  color: var(--color-emerald);
+}
+
+.stepper-dot.error {
+  border-color: var(--color-rose);
+  background: var(--color-rose-pale);
+  color: var(--color-rose);
+}
+
+.stepper-content { flex: 1; min-width: 0; }
+
+.stepper-name {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+.stepper-detail {
+  font-size: var(--font-xs);
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+/* ── Recent Actions Feed (Right Sidebar) ───────────────────────── */
+#recent-actions-panel {
+  padding: var(--space-4) var(--space-5);
+}
+
+.action-feed-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-faint);
+  font-size: var(--font-xs);
+}
+
+.action-feed-item:last-child { border-bottom: none; }
+
+.action-feed-icon { font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.action-feed-text { color: var(--color-text-secondary); line-height: 1.5; flex: 1; }
+.action-feed-time { color: var(--color-text-faint); flex-shrink: 0; }
+
+/* ── Main Header (Center Panel) ────────────────────────────────── */
+#main-header-title {
+  font-size: var(--font-sm);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+#system-status-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 10px;
+  border: 1px solid var(--color-emerald-border);
+  border-radius: var(--radius-full);
+  background: var(--color-emerald-pale);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  color: var(--color-emerald);
+}
+
+/* ── Input Dock ────────────────────────────────────────────────── */
+.quick-actions-row {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+.quick-actions-row::-webkit-scrollbar { display: none; }
+
+.quick-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: var(--font-xs);
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.quick-chip:hover {
+  background: var(--color-accent-pale);
+  border-color: var(--color-accent-border);
+  color: var(--color-accent);
+}
+
+.input-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  background: var(--color-canvas);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.input-row:focus-within {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(194,65,12,.08);
+}
+
+#chat-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font-family);
+  font-size: var(--font-base);
+  color: var(--color-text-primary);
+  resize: none;
+  outline: none;
+  line-height: 1.6;
+  max-height: 140px;
+  overflow-y: auto;
+  padding: var(--space-1) 0;
+}
+
+#chat-input::placeholder { color: var(--color-text-faint); }
+
+#send-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--color-accent);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+#send-btn:hover {
+  background: var(--color-accent-light);
+  transform: scale(1.04);
+}
+
+#send-btn:disabled {
+  background: var(--color-border-strong);
+  cursor: not-allowed;
+  transform: none;
+}
+
+#send-btn svg { width: 16px; height: 16px; color: white; }
+
+/* ── Recent Chats History Hub (Gemini / ChatGPT style) ───────────── */
+.chat-history-hub {
+  padding: var(--space-3) var(--space-3);
+  border-top: 1px solid var(--color-border-faint);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-history-hub-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-2);
+  padding: 0 var(--space-1);
+}
+
+.chat-history-title {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.btn-new-chat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--color-accent-pale);
+  border: 1px solid var(--color-accent-border);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-accent);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-new-chat-pill:hover {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.recent-chats-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 2px;
+}
+
+.chat-history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: var(--font-sm);
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+}
+
+.chat-history-item:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-primary);
+}
+
+.chat-history-item.active {
+  background: var(--color-surface-3);
+  color: var(--color-primary);
+  font-weight: 600;
+  border-color: var(--color-border);
+}
+
+.chat-item-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chat-item-icon {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.chat-item-delete {
+  opacity: 0;
+  background: transparent;
+  border: none;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 11px;
+  transition: all 0.15s ease;
+}
+
+.chat-history-item:hover .chat-item-delete {
+  opacity: 0.7;
+}
+
+.chat-item-delete:hover {
+  opacity: 1 !important;
+  color: var(--color-rose);
+  background: var(--color-rose-pale);
+}
+
+.chat-history-empty {
+  font-size: var(--font-xs);
+  color: var(--color-text-faint);
+  font-style: italic;
+  padding: 8px 4px;
+  text-align: center;
+}
+
