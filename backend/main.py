@@ -137,8 +137,13 @@ async def auth_login(session_id: Optional[str] = None, request: Request = None):
     Redirects the user's browser directly to the Google consent screen.
     """
     sid = session_id or str(uuid.uuid4())
-    base_url = str(request.base_url).rstrip("/")
-    redirect_uri = f"{base_url}/auth/callback"
+    # Use fixed redirect URI from env var if set (production/Vercel),
+    # otherwise derive from request (local dev)
+    if settings.GOOGLE_REDIRECT_URI and "localhost" not in settings.GOOGLE_REDIRECT_URI:
+        redirect_uri = settings.GOOGLE_REDIRECT_URI
+    else:
+        base_url = str(request.base_url).rstrip("/")
+        redirect_uri = f"{base_url}/auth/callback"
 
     try:
         auth_url, _ = get_authorization_url(session_id=sid, redirect_uri=redirect_uri)
@@ -155,8 +160,12 @@ async def auth_callback(code: str, state: Optional[str] = None, request: Request
     Redirects back to frontend with auth=success.
     """
     session_id = state or str(uuid.uuid4())
-    base_url = str(request.base_url).rstrip("/")
-    redirect_uri = f"{base_url}/auth/callback"
+    # Must use the SAME redirect_uri as used during authorization
+    if settings.GOOGLE_REDIRECT_URI and "localhost" not in settings.GOOGLE_REDIRECT_URI:
+        redirect_uri = settings.GOOGLE_REDIRECT_URI
+    else:
+        base_url = str(request.base_url).rstrip("/")
+        redirect_uri = f"{base_url}/auth/callback"
 
     try:
         exchange_code_for_credentials(code=code, redirect_uri=redirect_uri, session_id=session_id)
