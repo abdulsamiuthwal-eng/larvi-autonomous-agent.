@@ -3,7 +3,9 @@
  * Clean fetch wrapper for all backend communication.
  */
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? (window.location.port === '5500' ? 'http://127.0.0.1:8000' : window.location.origin)
+  : window.location.origin;
 
 /**
  * Send a chat message and get SSE stream back.

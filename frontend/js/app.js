@@ -147,6 +147,30 @@ function setupEventListeners() {
     sidebarNewChatBtn.addEventListener('click', handleNewChat);
   }
 
+  // Mobile sidebar menu toggle
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const sidebarLeft = document.getElementById('sidebar-left');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+
+  const toggleMobileSidebar = (open) => {
+    if (!sidebarLeft || !sidebarOverlay) return;
+    const shouldOpen = open !== undefined ? open : !sidebarLeft.classList.contains('mobile-open');
+    if (shouldOpen) {
+      sidebarLeft.classList.add('mobile-open');
+      sidebarOverlay.classList.add('active');
+    } else {
+      sidebarLeft.classList.remove('mobile-open');
+      sidebarOverlay.classList.remove('active');
+    }
+  };
+
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', () => toggleMobileSidebar());
+  }
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', () => toggleMobileSidebar(false));
+  }
+
   // Auth connect button in banner
   const connectBtn = document.getElementById('connect-google-btn');
   if (connectBtn) {
@@ -365,6 +389,12 @@ async function handleNewChat() {
   const welcomeScreen = document.getElementById('welcome-screen');
   if (welcomeScreen) welcomeScreen.style.display = '';
 
+  // Close mobile sidebar if open
+  const sidebarLeft = document.getElementById('sidebar-left');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  if (sidebarLeft) sidebarLeft.classList.remove('mobile-open');
+  if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+
   await loadRecentChats();
   showToast('New conversation started', 'success');
 }
@@ -374,6 +404,13 @@ window.larviApp = {
   switchSession: async (sessionId) => {
     if (sessionId === larviContext.sessionId) return;
     larviContext.setSessionId(sessionId);
+
+    // Close mobile sidebar if open
+    const sidebarLeft = document.getElementById('sidebar-left');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
+    if (sidebarLeft) sidebarLeft.classList.remove('mobile-open');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+
     await restoreSessionMessages(sessionId);
     await loadRecentChats();
   },

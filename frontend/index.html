@@ -153,6 +153,9 @@
   </aside><!-- /sidebar-left -->
 
 
+  <!-- Mobile Sidebar Overlay Backdrop -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
   <!-- ─────────────────────────────────────────────────────────────
        CENTER PANEL — Main Chat Interface
        ───────────────────────────────────────────────────────────── -->
@@ -171,7 +174,16 @@
 
     <!-- Top Header Bar -->
     <header id="main-header">
-      <span id="main-header-title">New Conversation</span>
+      <div class="header-left-group">
+        <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu" title="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
+        <span id="main-header-title">New Conversation</span>
+      </div>
       <div class="header-actions">
         <span id="current-date" class="text-sm text-muted"></span>
         <div id="system-status-pill">
