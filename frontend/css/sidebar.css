@@ -374,6 +374,41 @@
 
 #chat-input::placeholder { color: var(--color-text-faint); }
 
+.input-action-btn {
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.input-action-btn:hover {
+  background: var(--color-surface-2);
+  color: var(--color-accent);
+}
+
+/* ── Microphone Button & Recording State ─────────────────────────── */
+.mic-btn.recording {
+  background: rgba(225, 29, 72, 0.15) !important;
+  color: #e11d48 !important;
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  animation: micPulse 1.5s infinite ease-in-out;
+}
+
+@keyframes micPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 8px rgba(225, 29, 72, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+}
+
 #send-btn {
   width: 36px;
   height: 36px;
@@ -397,6 +432,23 @@
   background: var(--color-border-strong);
   cursor: not-allowed;
   transform: none;
+}
+
+/* Stop Mode when Agent is generating */
+#send-btn.stop-mode {
+  background: #e11d48 !important;
+  cursor: pointer !important;
+  box-shadow: 0 0 12px rgba(225, 29, 72, 0.4);
+  animation: stopButtonPulse 2s infinite ease-in-out;
+}
+#send-btn.stop-mode:hover {
+  background: #be123c !important;
+  transform: scale(1.08);
+}
+
+@keyframes stopButtonPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); box-shadow: 0 0 16px rgba(225, 29, 72, 0.6); }
 }
 
 #send-btn svg { width: 16px; height: 16px; color: white; }

@@ -142,10 +142,13 @@ function setupEventListeners() {
   const newChatBtn = document.getElementById('new-chat-btn');
   const userProfile = document.getElementById('user-profile');
 
-  // Send on button click
+  // Send on button click (or Stop on click while generating)
   if (sendBtn) {
     sendBtn.addEventListener('click', handleSend);
   }
+
+  // Voice Microphone Input
+  setupVoiceInput();
 
   // Send on Enter (Shift+Enter = new line)
   if (input) {
@@ -765,10 +768,22 @@ function promptDeleteAccount() {
   });
 }
 
-// ── Message Handling ──────────────────────────────────────────────────────────
+// ── Message Handling & Response Cancellation ──────────────────────────────────
+let currentAbortController = null;
 
 async function handleSend() {
-  if (isSending) return;
+  // If agent is currently generating response, clicking button STOPS generation
+  if (isSending) {
+    if (currentAbortController) {
+      currentAbortController.abort();
+      currentAbortController = null;
+    }
+    isSending = false;
+    hideTyping();
+    setSendButtonState(false);
+    showToast('Agent generation stopped ⏹️', 'info');
+    return;
+  }
 
   const input = document.getElementById('chat-input');
   const text = input ? input.value.trim() : '';
@@ -784,6 +799,7 @@ async function handleSend() {
 
 async function sendMessage(text) {
   isSending = true;
+  currentAbortController = new AbortController();
   setSendButtonState(true);
 
   if (activeViewName !== 'chat') {
@@ -813,17 +829,21 @@ async function sendMessage(text) {
         finalizeStreamingLarviMessage(data);
         await loadRecentChats();
       },
+      onAbort: () => {
+        hideTyping();
+        renderErrorMessage('⏹️ *Response generation stopped by user.*');
+      },
       onError: (err) => {
         hideTyping();
         renderErrorMessage(`Something went wrong: ${err.message}`);
         showToast(err.message, 'error');
       },
-    });
+    }, currentAbortController.signal);
 
-    if (!finalData) {
+    if (!finalData && isSending) {
       try {
         const { sendChatMessageSync } = await import('./api.js');
-        const result = await sendChatMessageSync(text, larviContext.sessionId);
+        const result = await sendChatMessageSync(text, larviContext.sessionId, currentAbortController.signal);
         hideTyping();
         renderLarviMessage(result);
         if (result.session_id) larviContext.setSessionId(result.session_id);
@@ -831,18 +851,99 @@ async function sendMessage(text) {
         if (result.workflow_steps) workflowStepper.setSteps(result.workflow_steps);
         result.tool_calls?.forEach(tc => actionFeed.addToolCallAction(tc));
       } catch (syncErr) {
-        hideTyping();
-        renderErrorMessage('Could not get a response. Please try again.');
+        if (syncErr.name !== 'AbortError') {
+          hideTyping();
+          renderErrorMessage('Could not get a response. Please try again.');
+        }
       }
     }
   } catch (err) {
-    hideTyping();
-    renderErrorMessage(`Unexpected error: ${err.message}`);
+    if (err.name !== 'AbortError') {
+      hideTyping();
+      renderErrorMessage(`Unexpected error: ${err.message}`);
+    }
   } finally {
     isSending = false;
+    currentAbortController = null;
     setSendButtonState(false);
     const input = document.getElementById('chat-input');
     if (input) input.focus();
+  }
+}
+
+// ── Voice / Speech Recognition ───────────────────────────────────────────────
+let speechRecognition = null;
+let isRecordingVoice = false;
+
+function setupVoiceInput() {
+  const micBtn = document.getElementById('mic-btn');
+  const chatInput = document.getElementById('chat-input');
+  if (!micBtn) return;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    micBtn.title = 'Voice input not supported in this browser';
+    micBtn.addEventListener('click', () => {
+      showToast('Voice input is supported in Chrome, Edge, and Safari.', 'warning');
+    });
+    return;
+  }
+
+  try {
+    speechRecognition = new SpeechRecognition();
+    speechRecognition.continuous = false;
+    speechRecognition.interimResults = true;
+    speechRecognition.lang = 'en-US';
+
+    speechRecognition.onstart = () => {
+      isRecordingVoice = true;
+      micBtn.classList.add('recording');
+      micBtn.title = 'Listening… Click to stop speaking';
+      showToast('Listening… Speak now 🎙️', 'info');
+    };
+
+    speechRecognition.onresult = (event) => {
+      let transcript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        transcript += event.results[i][0].transcript;
+      }
+      if (chatInput && transcript) {
+        chatInput.value = transcript;
+        chatInput.style.height = 'auto';
+        chatInput.style.height = Math.min(chatInput.scrollHeight, 140) + 'px';
+      }
+    };
+
+    speechRecognition.onerror = (event) => {
+      console.warn('[Voice] Speech recognition error:', event.error);
+      isRecordingVoice = false;
+      micBtn.classList.remove('recording');
+      micBtn.title = 'Voice Input (Speak your prompt)';
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        showToast(`Microphone: ${event.error}`, 'warning');
+      }
+    };
+
+    speechRecognition.onend = () => {
+      isRecordingVoice = false;
+      micBtn.classList.remove('recording');
+      micBtn.title = 'Voice Input (Speak your prompt)';
+      if (chatInput) chatInput.focus();
+    };
+
+    micBtn.addEventListener('click', () => {
+      if (isRecordingVoice) {
+        speechRecognition.stop();
+      } else {
+        try {
+          speechRecognition.start();
+        } catch (e) {
+          console.warn('Speech recognition start error:', e);
+        }
+      }
+    });
+  } catch (e) {
+    console.warn('[Voice] Init error:', e);
   }
 }
 
@@ -1004,9 +1105,27 @@ window.larviApp = {
 };
 
 // ── UI Helpers ────────────────────────────────────────────────────────────────
-function setSendButtonState(disabled) {
+function setSendButtonState(isGenerating) {
   const btn = document.getElementById('send-btn');
-  if (btn) btn.disabled = disabled;
+  const sendIcon = document.getElementById('send-icon');
+  const stopIcon = document.getElementById('stop-icon');
+  if (!btn) return;
+
+  if (isGenerating) {
+    btn.classList.add('stop-mode');
+    btn.disabled = false;
+    btn.title = 'Stop response (Cancel generation)';
+    btn.setAttribute('aria-label', 'Stop response');
+    if (sendIcon) sendIcon.style.display = 'none';
+    if (stopIcon) stopIcon.style.display = 'block';
+  } else {
+    btn.classList.remove('stop-mode');
+    btn.disabled = false;
+    btn.title = 'Send (Enter)';
+    btn.setAttribute('aria-label', 'Send message');
+    if (sendIcon) sendIcon.style.display = 'block';
+    if (stopIcon) stopIcon.style.display = 'none';
+  }
 }
 
 function renderQuickChips() {

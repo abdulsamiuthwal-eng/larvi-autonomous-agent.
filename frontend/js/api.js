@@ -11,16 +11,18 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
  * Send a chat message and get SSE stream back.
  * @param {string} message - User message
  * @param {string|null} sessionId - Session ID (null for new session)
- * @param {object} callbacks - { onStep, onToolCall, onFinal, onError }
+ * @param {object} callbacks - { onStep, onToolCall, onFinal, onToken, onTyping, onError, onAbort }
+ * @param {AbortSignal|null} signal - Optional abort signal
  */
-async function sendChatMessage(message, sessionId, callbacks = {}) {
-  const { onStep, onToolCall, onFinal, onTyping, onError } = callbacks;
+async function sendChatMessage(message, sessionId, callbacks = {}, signal = null) {
+  const { onStep, onToolCall, onFinal, onToken, onTyping, onError, onAbort } = callbacks;
 
   try {
     const response = await fetch(`${API_BASE}/chat/stream`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, session_id: sessionId }),
+      signal: signal,
     });
 
     if (!response.ok) {
@@ -65,6 +67,10 @@ async function sendChatMessage(message, sessionId, callbacks = {}) {
       }
     }
   } catch (err) {
+    if (err.name === 'AbortError') {
+      if (onAbort) onAbort();
+      return;
+    }
     if (onError) onError(err);
     else console.error('[API] Chat error:', err);
   }
@@ -73,11 +79,12 @@ async function sendChatMessage(message, sessionId, callbacks = {}) {
 /**
  * Non-streaming fallback chat (for when SSE is unavailable).
  */
-async function sendChatMessageSync(message, sessionId) {
+async function sendChatMessageSync(message, sessionId, signal = null) {
   const response = await fetch(`${API_BASE}/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ message, session_id: sessionId }),
+    signal: signal,
   });
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
