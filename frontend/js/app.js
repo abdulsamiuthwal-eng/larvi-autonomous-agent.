@@ -166,7 +166,7 @@ function setupEventListeners() {
     });
   }
 
-  // View Navigation Listeners
+  // View Navigation Listeners (Sidebar)
   const navChat = document.getElementById('nav-chat');
   const navInbox = document.getElementById('nav-inbox');
   const navCalendar = document.getElementById('nav-calendar');
@@ -176,6 +176,15 @@ function setupEventListeners() {
   if (navInbox) navInbox.addEventListener('click', () => switchView('inbox'));
   if (navCalendar) navCalendar.addEventListener('click', () => switchView('calendar'));
   if (navSettings) navSettings.addEventListener('click', () => switchView('settings'));
+
+  // Mobile Bottom Navigation Listeners
+  const mobNavItems = document.querySelectorAll('.mob-nav-item');
+  mobNavItems.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const view = btn.getAttribute('data-view');
+      if (view) switchView(view);
+    });
+  });
 
   // Inbox & Calendar View Action Listeners
   const inboxRefreshBtn = document.getElementById('inbox-refresh-btn');
@@ -403,12 +412,22 @@ function switchView(viewName) {
   activeViewName = viewName;
   const headerTitle = document.getElementById('main-header-title');
 
-  // Update Nav Item Active State
+  // Update Nav Item Active State (Sidebar)
   const navItems = document.querySelectorAll('#nav-list .nav-item');
   navItems.forEach(item => item.classList.remove('active'));
 
   const activeNav = document.getElementById(`nav-${viewName}`);
   if (activeNav) activeNav.classList.add('active');
+
+  // Update Mobile Bottom Nav Active State
+  const mobNavItems = document.querySelectorAll('.mob-nav-item');
+  mobNavItems.forEach(item => {
+    if (item.getAttribute('data-view') === viewName) {
+      item.classList.add('active');
+    } else {
+      item.classList.remove('active');
+    }
+  });
 
   // Hide all views, show selected
   const allViews = document.querySelectorAll('.app-view');

@@ -607,3 +607,78 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* ── Mobile Responsive Optimizations ─────────────────────────────── */
+@media (max-width: 768px) {
+  .message-group {
+    gap: var(--space-2);
+    max-width: 100% !important;
+  }
+
+  .msg-avatar {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    border-radius: var(--radius-sm) !important;
+  }
+
+  .msg-avatar svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+
+  .user-bubble {
+    padding: var(--space-2) var(--space-3) !important;
+    font-size: 13.5px !important;
+    max-width: 92% !important;
+    border-radius: 14px 14px 2px 14px !important;
+  }
+
+  .larvi-card {
+    border-radius: 2px 14px 14px 14px !important;
+  }
+
+  .larvi-card-header {
+    padding: 6px 10px !important;
+    gap: 6px !important;
+  }
+
+  .larvi-card-body {
+    padding: 10px 12px !important;
+    font-size: 13.5px !important;
+    line-height: 1.6 !important;
+  }
+
+  .email-widget {
+    margin: 6px 0 !important;
+    padding: 10px !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .event-widget, .event-badge-card {
+    margin: 6px 0 !important;
+    padding: 10px !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .widget-actions, .card-actions {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .tool-calls-section {
+    padding: 4px 10px !important;
+    gap: 4px !important;
+  }
+
+  .tool-call-pill {
+    padding: 2px 6px !important;
+    font-size: 10px !important;
+  }
+
+  pre {
+    padding: 8px !important;
+    font-size: 11px !important;
+    border-radius: var(--radius-sm) !important;
+  }
+}
+

@@ -750,10 +750,43 @@
 }
 
 @media (max-width: 768px) {
-  .profile-hero-content { flex-direction: column; text-align: center; }
-  .profile-forms-grid { grid-template-columns: 1fr; }
-  .profile-session-body { flex-direction: column; align-items: flex-start; }
-  .profile-hero-name { font-size: 20px; }
+  .view-content-container {
+    padding: var(--space-4) var(--space-3) var(--space-8);
+  }
+
+  /* Profile View on Mobile */
+  .profile-hero-content { flex-direction: column; text-align: center; gap: var(--space-3); }
+  .profile-avatar-wrap { margin: 0 auto; width: 72px; height: 72px; }
+  .profile-forms-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+  .profile-session-body { flex-direction: column; align-items: stretch; gap: var(--space-3); }
+  .profile-hero-name { font-size: 19px; }
+  .profile-hero-badge { margin: 4px auto 0; }
+  .form-actions button { width: 100%; justify-content: center; }
+
+  /* Inbox & Email List on Mobile */
+  .email-card-item { padding: 12px 14px; }
+  .email-card-top-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .email-card-sender { font-size: 13px; font-weight: 700; }
+  .email-card-date { font-size: 10px; color: var(--color-text-faint); }
+  .email-card-subject { font-size: 13px; }
+  .email-card-snippet { font-size: 12px; -webkit-line-clamp: 2; }
+
+  /* Calendar List on Mobile */
+  .event-card-item { padding: 12px 14px; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .event-time-badge { align-self: flex-start; }
+  .event-card-title { font-size: 14px; }
+  .event-card-details { font-size: 11.5px; }
+
+  /* Settings View on Mobile */
+  .settings-grid { grid-template-columns: 1fr; gap: var(--space-3); }
+  .settings-card-header { padding: 12px 14px; }
+  .settings-card-body { padding: 12px 14px; }
+  .settings-stats-row { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+  .stat-badge { padding: 8px 4px; }
+  .stat-num { font-size: 16px; }
+  .stat-lbl { font-size: 9px; }
+  .settings-actions-flex { flex-direction: column; }
+  .settings-actions-flex button { width: 100%; justify-content: center; }
 }
 
 
