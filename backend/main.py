@@ -278,6 +278,20 @@ async def chat_stream(request: ChatRequest):
                 user_input=request.message,
                 session=session,
             )
+        except Exception as agent_err:
+            current_session_id.reset(token)
+            err_msg = str(agent_err)
+            # User-friendly messages for common failures
+            if "429" in err_msg or "quota" in err_msg.lower() or "resourceexhausted" in err_msg.lower():
+                friendly = "⚠️ Gemini API quota exhausted for today. Please try again tomorrow or add a new API key."
+            elif "404" in err_msg or "no longer available" in err_msg.lower():
+                friendly = "⚠️ AI model unavailable. Please try again in a moment."
+            else:
+                friendly = f"⚠️ I encountered an issue: {err_msg[:200]}. Please try again."
+            error_payload = {"type": "error", "message": friendly, "session_id": session_id}
+            yield f"data: {json.dumps(error_payload)}\n\n"
+            yield "data: [DONE]\n\n"
+            return
         finally:
             current_session_id.reset(token)
 
