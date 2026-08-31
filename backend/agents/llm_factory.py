@@ -15,12 +15,12 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 # Production model cascade — fastest & highest-quota first.
-# All are Gemini Flash-class: low latency, high RPD, free tier friendly.
+# gemini-2.5-flash is excluded: 404 for new API keys (per Google's own notice).
 FALLBACK_CASCADE = [
     "gemini-2.5-flash-lite",   # Primary: 1500 RPD free tier, lowest latency
-    "gemini-2.5-flash",        # Fallback 1: higher intelligence, still fast
-    "gemini-1.5-flash",        # Fallback 2: stable v1 model
-    "gemini-2.0-flash",        # Fallback 3: v2 stable release
+    "gemini-2.0-flash",        # Fallback 1: v2 stable, widely available
+    "gemini-1.5-flash",        # Fallback 2: proven v1 stable model
+    "gemini-3.6-flash",        # Fallback 3: Google-recommended for new API keys
     "gemini-1.5-flash-8b",     # Fallback 4: smallest/fastest emergency model
 ]
 
@@ -49,13 +49,8 @@ def get_llm(temperature: float = 0.1, model: str = None) -> ChatGoogleGenerative
 
 def invoke_llm_with_fallback(llm_invoker_fn, *args, **kwargs):
     """
-    Invoke an LLM function (e.g. llm.invoke or agent_executor.invoke).
-    If a 429 / Quota / ResourceExhausted error occurs, automatically
-    retries with the next model in the fallback cascade.
-
-    With max_retries=1, each model attempt costs at most ~2 seconds before
-    this cascade moves to the next model — giving sub-5-second total latency
-    even when the primary model is exhausted.
+    Invoke an LLM function with automatic model fallback.
+    Catches both 429 quota errors AND 404 model-not-available errors.
     """
     last_error = None
     for model_name in ORDERED_MODELS:
@@ -63,13 +58,17 @@ def invoke_llm_with_fallback(llm_invoker_fn, *args, **kwargs):
             return llm_invoker_fn(model_name, *args, **kwargs)
         except Exception as e:
             err_str = str(e)
-            if "429" in err_str or "quota" in err_str.lower() or "resourceexhausted" in err_str.lower():
-                logger.warning(f"[LLM Factory] Model '{model_name}' hit rate limit. Instantly switching to next model...")
+            is_quota   = "429" in err_str or "quota" in err_str.lower() or "resourceexhausted" in err_str.lower()
+            is_no_model = "404" in err_str or "no longer available" in err_str.lower() or "not found" in err_str.lower()
+            if is_quota or is_no_model:
+                reason = "quota limit" if is_quota else "model unavailable (404)"
+                logger.warning(f"[LLM Factory] '{model_name}' skipped ({reason}). Trying next...")
                 last_error = e
                 continue
             else:
                 raise e
 
-    # All models exhausted — raise last quota error
+    # All models exhausted — raise last error
     if last_error:
         raise last_error
+
