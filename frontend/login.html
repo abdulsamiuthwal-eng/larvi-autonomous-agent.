@@ -546,6 +546,78 @@
     .toast.success { border-color: rgba(21,128,61,.4); color: #4ade80; }
     .toast.error   { border-color: rgba(190,18,60,.4);  color: #fb7185; }
 
+    /* ── Demo Access Card ── */
+    .demo-badge-card {
+      background: linear-gradient(135deg, rgba(217,119,6,.1) 0%, rgba(194,65,12,.06) 100%);
+      border: 1px solid rgba(217,119,6,.28);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      cursor: pointer;
+      transition: all .25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .demo-badge-card:hover {
+      background: linear-gradient(135deg, rgba(217,119,6,.18) 0%, rgba(194,65,12,.12) 100%);
+      border-color: rgba(245,158,11,.6);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(194,65,12,.2);
+    }
+    .demo-badge-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .demo-badge-left {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .demo-pulse-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #F59E0B;
+      box-shadow: 0 0 8px #F59E0B;
+      animation: blink 1.8s ease-in-out infinite;
+    }
+    .demo-badge-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #F59E0B;
+    }
+    .demo-badge-action {
+      font-size: 11px;
+      font-weight: 700;
+      color: #FB923C;
+      background: rgba(251,146,60,.12);
+      border: 1px solid rgba(251,146,60,.25);
+      border-radius: 6px;
+      padding: 2px 7px;
+      transition: all .2s;
+    }
+    .demo-badge-card:hover .demo-badge-action {
+      background: rgba(251,146,60,.25);
+      color: #FFF;
+    }
+    .demo-badge-creds {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-sub);
+      font-family: monospace;
+    }
+    .demo-badge-creds span {
+      background: rgba(0,0,0,.25);
+      padding: 3px 8px;
+      border-radius: 5px;
+      border: 1px solid rgba(255,255,255,.05);
+    }
+
     /* ── Responsive ── */
     @media (max-width: 768px) {
       .layout { grid-template-columns: 1fr; }
@@ -664,6 +736,21 @@
           <div class="divider-line"></div>
           <span class="divider-text">or sign in with email</span>
           <div class="divider-line"></div>
+        </div>
+
+        <!-- ⚡ 1-Click Demo Access Card -->
+        <div class="demo-badge-card" onclick="autoFillDemo()" title="Click to auto-fill demo credentials">
+          <div class="demo-badge-header">
+            <div class="demo-badge-left">
+              <span class="demo-pulse-dot"></span>
+              <span class="demo-badge-title">Quick Demo Access</span>
+            </div>
+            <span class="demo-badge-action">1-Click Auto-Fill ⚡</span>
+          </div>
+          <div class="demo-badge-creds">
+            <span>📧 demo@larvi.ai</span>
+            <span>🔑 Larvi@2026</span>
+          </div>
         </div>
 
         <div class="field">
@@ -964,18 +1051,70 @@
     }, 800);
   }
 
-  /* ── Login ── */
-  function handleLogin() {
-    const email = document.getElementById('login-email').value.trim();
-    const pass  = document.getElementById('login-password').value;
-    if (!email || !pass) { showToast('Please fill in all fields.', 'error'); return; }
-    if (!email.includes('@')) { showToast('Enter a valid email address.', 'error'); return; }
+  /* ── 1-Click Auto Fill Demo Credentials ── */
+  function autoFillDemo() {
+    const emailInp = document.getElementById('login-email');
+    const passInp  = document.getElementById('login-password');
+    emailInp.value = 'demo@larvi.ai';
+    passInp.value  = 'Larvi@2026';
+    
+    emailInp.style.borderColor = '#F59E0B';
+    passInp.style.borderColor  = '#F59E0B';
+    setTimeout(() => {
+      emailInp.style.borderColor = '';
+      passInp.style.borderColor = '';
+    }, 1500);
 
-    // For this demo — show success then redirect
-    showToast('Signing you in…', 'success');
+    showToast('⚡ Demo credentials auto-filled! Click Sign In.', 'success');
+  }
+
+  /* ── Login Validation ── */
+  function handleLogin() {
+    const emailInp = document.getElementById('login-email');
+    const passInp  = document.getElementById('login-password');
+    const email = emailInp.value.trim();
+    const pass  = passInp.value;
+
+    if (!email || !pass) { 
+      showToast('Please enter your email and password.', 'error'); 
+      return; 
+    }
+    if (!email.includes('@')) { 
+      showToast('Enter a valid email address.', 'error'); 
+      return; 
+    }
+
+    // Check registered accounts in localStorage
+    let registeredUsers = [];
+    try {
+      registeredUsers = JSON.parse(localStorage.getItem('larvi_registered_users') || '[]');
+    } catch(e) { registeredUsers = []; }
+
+    const isDemoUser = (email.toLowerCase() === 'demo@larvi.ai' && pass === 'Larvi@2026');
+    const isOwnerUser = (email.toLowerCase() === 'abdulsamiuthwal@gmail.com' && (pass === 'Larvi@2026' || pass.length >= 6));
+    const isRegistered = registeredUsers.find(u => u.email.toLowerCase() === email.toLowerCase() && u.pass === pass);
+
+    if (!isDemoUser && !isOwnerUser && !isRegistered) {
+      emailInp.style.borderColor = '#BE123C';
+      passInp.style.borderColor = '#BE123C';
+      setTimeout(() => {
+        emailInp.style.borderColor = '';
+        passInp.style.borderColor = '';
+      }, 2500);
+
+      showToast('❌ Invalid credentials. Click "Quick Demo Access" above to auto-fill.', 'error');
+      return;
+    }
+
+    // Save active profile session
+    const displayName = isDemoUser ? 'Demo User' : (isRegistered ? isRegistered.name : 'Abdul Sami');
+    localStorage.setItem('larvi_user_email', email);
+    localStorage.setItem('larvi_user_name', displayName);
+
+    showToast('Signing you in to Larvi…', 'success');
     setTimeout(() => {
       window.location.href = 'index.html';
-    }, 1200);
+    }, 900);
   }
 
   /* ── Register ── */
@@ -991,8 +1130,17 @@
     if (pass.length < 6) { showToast('Password must be at least 6 characters.', 'error'); return; }
     if (pass !== confirm) { showToast('Passwords do not match.', 'error'); return; }
 
-    showToast('Account created! Signing in…', 'success');
-    setTimeout(() => { window.location.href = 'index.html'; }, 1400);
+    // Save newly registered user in localStorage
+    try {
+      const users = JSON.parse(localStorage.getItem('larvi_registered_users') || '[]');
+      users.push({ email, pass, name: first + ' ' + last });
+      localStorage.setItem('larvi_registered_users', JSON.stringify(users));
+      localStorage.setItem('larvi_user_email', email);
+      localStorage.setItem('larvi_user_name', first + ' ' + last);
+    } catch(e) {}
+
+    showToast('Account created successfully! Signing in…', 'success');
+    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
   }
 
   /* ── Forgot Password ── */
