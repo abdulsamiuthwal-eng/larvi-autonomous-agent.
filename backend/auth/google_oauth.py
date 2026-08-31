@@ -123,7 +123,9 @@ def create_web_flow(redirect_uri: str) -> Flow:
         try:
             with open(credentials_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            if "web" in data or "installed" in data:
+            client_dict = data.get("web") or data.get("installed") or {}
+            c_id = client_dict.get("client_id", "")
+            if c_id and not c_id.startswith("USE_") and "apps.googleusercontent.com" in c_id:
                 return Flow.from_client_config(
                     data,
                     scopes=settings.GOOGLE_SCOPES,
@@ -258,3 +260,33 @@ def run_oauth_flow() -> Credentials:
     save_credentials(creds, None)
     print("[Auth] OAuth flow completed. Global token saved.")
     return creds
+
+
+def logout_user(session_id: Optional[str] = None) -> None:
+    """Disconnect session credentials and remove token files (both session and global)."""
+    global _session_credentials, _session_userinfo
+    if session_id:
+        _session_credentials.pop(session_id, None)
+        _session_userinfo.pop(session_id, None)
+        session_token_path = _get_token_path(session_id)
+        if session_token_path.exists():
+            try:
+                session_token_path.unlink()
+                print(f"[Auth] Deleted session token: {session_token_path}")
+            except Exception as e:
+                print(f"[Auth] Could not delete session token {session_id}: {e}")
+
+    # Also clear global memory and default token.json
+    _session_credentials.pop("global", None)
+    _session_userinfo.pop("global", None)
+    _session_credentials.clear()
+    _session_userinfo.clear()
+
+    global_token_path = BASE_DIR / settings.GOOGLE_TOKEN_PATH
+    if global_token_path.exists():
+        try:
+            global_token_path.unlink()
+            print(f"[Auth] Deleted global token: {global_token_path}")
+        except Exception as e:
+            print(f"[Auth] Could not delete global token: {e}")
+

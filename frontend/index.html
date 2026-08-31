@@ -254,13 +254,12 @@
           </svg>
           <span class="btn-text">New Chat</span>
         </button>
-        <button id="header-logout-btn" class="btn btn-ghost btn-sm text-rose header-action-btn" title="Log Out">
+        <button id="header-disconnect-btn" class="btn btn-ghost btn-sm text-amber header-action-btn" title="Disconnect Google Account">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+            <line x1="12" y1="2" x2="12" y2="12"></line>
           </svg>
-          <span class="btn-text">Logout</span>
+          <span class="btn-text">Disconnect Google</span>
         </button>
       </div>
     </header>
@@ -801,6 +800,25 @@
   </aside><!-- /sidebar-right -->
 
 </div><!-- /#app -->
+
+<!-- ════ Glassmorphic Confirmation Modal ════ -->
+<div id="confirm-dialog-modal" class="confirm-modal-overlay" style="display:none;" role="dialog" aria-modal="true">
+  <div class="confirm-modal-box">
+    <div class="confirm-modal-icon-wrap danger" id="confirm-modal-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+    </div>
+    <h3 class="confirm-modal-title" id="confirm-modal-title">Are you sure?</h3>
+    <p class="confirm-modal-desc" id="confirm-modal-desc">Do you want to proceed with this action?</p>
+    <div class="confirm-modal-actions">
+      <button type="button" class="btn btn-ghost" id="confirm-modal-cancel">Cancel</button>
+      <button type="button" class="btn btn-danger-pill" id="confirm-modal-proceed">Yes, Proceed</button>
+    </div>
+  </div>
+</div>
 
 <!-- Application JS (ES Modules) -->
 <script type="module" src="js/app.js"></script>

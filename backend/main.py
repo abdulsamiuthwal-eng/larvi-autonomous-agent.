@@ -19,7 +19,8 @@ from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse
+from fastapi.responses import StreamingResponse, JSONResponse, RedirectResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from config import settings
@@ -168,8 +169,15 @@ async def auth_callback(code: str, state: Optional[str] = None, request: Request
 
     try:
         exchange_code_for_credentials(code=code, redirect_uri=redirect_uri, session_id=session_id)
-        # Redirect directly to the app UI (not splash/login) with session_id
-        base_frontend = (settings.FRONTEND_URL or "http://localhost:5500").rstrip("/")
+        # Dynamic frontend host resolution
+        host_header = request.headers.get("host", "") if request else ""
+        if "localhost" in host_header or "127.0.0.1" in host_header:
+            base_frontend = f"http://{host_header}"
+        elif settings.FRONTEND_URL and "localhost" not in settings.FRONTEND_URL:
+            base_frontend = settings.FRONTEND_URL.rstrip("/")
+        else:
+            base_frontend = str(request.base_url).rstrip("/") if request else "http://localhost:8000"
+
         frontend_url = f"{base_frontend}/app?auth=success&session_id={session_id}"
         return RedirectResponse(url=frontend_url)
     except Exception as e:
@@ -434,18 +442,31 @@ async def clear_all_data_endpoint():
 
 @app.post("/auth/logout")
 async def logout_endpoint(session_id: Optional[str] = None):
-    """Disconnect Google account and clear session token."""
-    from auth.google_oauth import _session_credentials, _session_userinfo, _get_token_path
-    if session_id:
-        _session_credentials.pop(session_id, None)
-        _session_userinfo.pop(session_id, None)
-        token_path = _get_token_path(session_id)
-        if token_path.exists():
-            try:
-                token_path.unlink()
-            except Exception:
-                pass
+    """Disconnect Google account and clear session & global tokens."""
+    from auth.google_oauth import logout_user
+    logout_user(session_id)
     return {"status": "logged_out", "message": "Google account disconnected successfully."}
+
+
+# ── Static Frontend Serving (Local & Server) ──────────────────────────────────
+FRONTEND_DIR = BACKEND_DIR.parent / "frontend"
+if FRONTEND_DIR.exists():
+    @app.get("/", include_in_schema=False)
+    async def serve_root():
+        splash = FRONTEND_DIR / "splash.html"
+        return FileResponse(splash if splash.exists() else FRONTEND_DIR / "index.html")
+
+    @app.get("/login", include_in_schema=False)
+    @app.get("/login.html", include_in_schema=False)
+    async def serve_login():
+        return FileResponse(FRONTEND_DIR / "login.html")
+
+    @app.get("/app", include_in_schema=False)
+    @app.get("/index.html", include_in_schema=False)
+    async def serve_app():
+        return FileResponse(FRONTEND_DIR / "index.html")
+
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
 
 
 # ── Run ───────────────────────────────────────────────────────────────────────

@@ -285,17 +285,39 @@ function setupEventListeners() {
     });
   }
 
-  // ── Logout Handlers ────────────────────────────────────────────────────────
+  // ── Disconnect & Logout Handlers ───────────────────────────────────────────
   const sidebarLogoutBtn = document.getElementById('sidebar-logout-btn');
-  const headerLogoutBtn = document.getElementById('header-logout-btn');
+  const headerDisconnectBtn = document.getElementById('header-disconnect-btn') || document.getElementById('header-logout-btn');
   const profileLogoutBtn = document.getElementById('profile-logout-btn');
 
-  if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    handleLogout();
-  });
-  if (headerLogoutBtn) headerLogoutBtn.addEventListener('click', handleLogout);
-  if (profileLogoutBtn) profileLogoutBtn.addEventListener('click', handleLogout);
+  // Top Bar Disconnect Button -> Disconnects Google Account Only (Stays in App)
+  if (headerDisconnectBtn) {
+    headerDisconnectBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (larviContext.authState && larviContext.authState.authenticated) {
+        handleDisconnectGoogle();
+      } else {
+        const loginUrl = getLoginUrl(larviContext.sessionId);
+        window.location.href = loginUrl;
+      }
+    });
+  }
+
+  // Sidebar Profile Logout -> Complete Workspace Sign-Out (Redirects to login.html)
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleAppLogout();
+    });
+  }
+
+  // Profile View Danger Button -> Complete Workspace Sign-Out
+  if (profileLogoutBtn) {
+    profileLogoutBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleAppLogout();
+    });
+  }
 
   // ── Profile Photo Upload & Remove ──────────────────────────────────────────
   const photoInput = document.getElementById('profile-pic-file-input');
@@ -395,14 +417,109 @@ function setupEventListeners() {
   }
 }
 
-// ── Global Logout Function ────────────────────────────────────────────────────
-function handleLogout() {
-  showToast('Signing out of Larvi…', 'info');
-  sessionStorage.removeItem('larvi_session_id');
-  sessionStorage.removeItem('larvi_active_conversation_id');
-  setTimeout(() => {
-    window.location.href = 'splash.html';
-  }, 400);
+// ── Confirmation Modal Utility ────────────────────────────────────────────────
+let pendingModalProceed = null;
+
+function showConfirmationModal({ title, desc, iconType = 'danger', proceedText = 'Yes, Proceed', onProceed }) {
+  const modalOverlay = document.getElementById('confirm-dialog-modal');
+  const titleEl = document.getElementById('confirm-modal-title');
+  const descEl = document.getElementById('confirm-modal-desc');
+  const iconWrap = document.getElementById('confirm-modal-icon');
+  const proceedBtn = document.getElementById('confirm-modal-proceed');
+  const cancelBtn = document.getElementById('confirm-modal-cancel');
+
+  if (!modalOverlay || !titleEl || !descEl || !proceedBtn) {
+    if (confirm(desc || title)) {
+      if (typeof onProceed === 'function') onProceed();
+    }
+    return;
+  }
+
+  titleEl.textContent = title;
+  descEl.textContent = desc;
+  proceedBtn.textContent = proceedText;
+
+  if (iconWrap) {
+    iconWrap.className = `confirm-modal-icon-wrap ${iconType}`;
+  }
+
+  pendingModalProceed = onProceed;
+  modalOverlay.style.display = 'flex';
+
+  const closeDialog = () => {
+    modalOverlay.style.display = 'none';
+    pendingModalProceed = null;
+  };
+
+  if (cancelBtn) {
+    cancelBtn.onclick = closeDialog;
+  }
+
+  proceedBtn.onclick = () => {
+    const callback = pendingModalProceed;
+    modalOverlay.style.display = 'none';
+    pendingModalProceed = null;
+    if (typeof callback === 'function') {
+      callback();
+    }
+  };
+
+  modalOverlay.onclick = (e) => {
+    if (e.target === modalOverlay) closeDialog();
+  };
+}
+
+// ── 1. Disconnect Google Account (Stay in App) ────────────────────────────────
+async function handleDisconnectGoogle() {
+  showConfirmationModal({
+    title: 'Disconnect Google Account?',
+    desc: 'Are you sure you want to disconnect Gmail and Google Calendar? You will stay in your workspace and can reconnect anytime.',
+    iconType: 'warning',
+    proceedText: 'Disconnect Google',
+    onProceed: async () => {
+      showToast('Disconnecting Google account…', 'info');
+      try {
+        await logoutGoogleApi(larviContext.sessionId);
+      } catch (err) {
+        console.warn('[Auth] Disconnect error:', err);
+      }
+
+      larviContext.setAuthState({
+        authenticated: false,
+        email: null,
+        name: null,
+        picture: null,
+        token_valid: false,
+      });
+      larviContext.updateAuthUI(larviContext.authState);
+      showToast('Google account disconnected successfully! 🔌', 'success');
+    },
+  });
+}
+
+// ── 2. Complete Workspace Sign-Out (Redirect to login.html) ───────────────────
+async function handleAppLogout() {
+  showConfirmationModal({
+    title: 'Sign Out of Workspace?',
+    desc: 'Are you sure you want to sign out of Larvi? You will be redirected to the login screen.',
+    iconType: 'danger',
+    proceedText: 'Sign Out',
+    onProceed: async () => {
+      showToast('Signing out of Larvi…', 'info');
+      try {
+        await logoutGoogleApi(larviContext.sessionId);
+      } catch (e) {}
+
+      sessionStorage.clear();
+      localStorage.removeItem('larvi_user_email');
+      localStorage.removeItem('larvi_user_name');
+      localStorage.removeItem('larvi_session_id');
+
+      setTimeout(() => {
+        window.location.href = 'login.html';
+      }, 300);
+    },
+  });
 }
 
 // ── View Switching Logic ──────────────────────────────────────────────────────
@@ -476,24 +593,53 @@ async function loadInboxView(forceRefresh = false) {
   container.innerHTML = `<div class="dashboard-loading"><div class="spinner"></div> Loading recent emails from Gmail…</div>`;
 
   const data = await fetchRecentEmails(larviContext.sessionId);
+  const isAuthenticated = larviContext.authState && larviContext.authState.authenticated;
+
   if (!data || data.status !== 'success' || !data.emails || data.emails.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
-            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
-          </svg>
+    if (!isAuthenticated) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+            </svg>
+          </div>
+          <div class="empty-state-text">
+            <strong>Google Account Not Connected</strong><br>
+            Connect your Google account to sync and manage your live Gmail inbox.
+          </div>
+          <button class="btn btn-primary-pill btn-sm" style="margin-top: 16px;" id="inbox-connect-btn">
+            Connect Google Account
+          </button>
         </div>
-        <div class="empty-state-text">
-          <strong>No recent emails loaded.</strong><br>
-          Connect your Google account to sync your live Gmail inbox.
+      `;
+      const btn = document.getElementById('inbox-connect-btn');
+      if (btn) btn.onclick = () => window.location.href = getLoginUrl(larviContext.sessionId);
+    } else {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"></polyline>
+              <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+            </svg>
+          </div>
+          <div class="empty-state-text">
+            <strong>Inbox is Clean &amp; Up to Date! 📬</strong><br>
+            No recent messages found in your primary inbox.
+          </div>
+          <button class="btn btn-primary-pill btn-sm" style="margin-top: 16px;" id="inbox-compose-btn-action">
+            + Compose an Email with Larvi
+          </button>
         </div>
-        <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="window.location.href=getLoginUrl(larviContext.sessionId)">
-          Connect Gmail Account
-        </button>
-      </div>
-    `;
+      `;
+      const btn = document.getElementById('inbox-compose-btn-action');
+      if (btn) btn.onclick = () => {
+        switchView('chat');
+        window.sendQuickMessage('Help me draft a new email');
+      };
+    }
     return;
   }
 
@@ -532,26 +678,57 @@ async function loadCalendarView(forceRefresh = false) {
   container.innerHTML = `<div class="dashboard-loading"><div class="spinner"></div> Loading Google Calendar agenda…</div>`;
 
   const data = await fetchCalendarEvents(larviContext.sessionId);
+  const isAuthenticated = larviContext.authState && larviContext.authState.authenticated;
+
   if (!data || data.status !== 'success' || !data.events || data.events.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-state-icon">
-          <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="16" y1="2" x2="16" y2="6"></line>
-            <line x1="8" y1="2" x2="8" y2="6"></line>
-            <line x1="3" y1="10" x2="21" y2="10"></line>
-          </svg>
+    if (!isAuthenticated) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <div class="empty-state-text">
+            <strong>Google Calendar Not Connected</strong><br>
+            Connect your Google account to view upcoming meetings and events.
+          </div>
+          <button class="btn btn-primary-pill btn-sm" style="margin-top: 16px;" id="cal-connect-btn">
+            Connect Google Calendar
+          </button>
         </div>
-        <div class="empty-state-text">
-          <strong>No upcoming meetings scheduled.</strong><br>
-          Ask Larvi to schedule an event or connect your Google Calendar.
+      `;
+      const btn = document.getElementById('cal-connect-btn');
+      if (btn) btn.onclick = () => window.location.href = getLoginUrl(larviContext.sessionId);
+    } else {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <div class="empty-state-text">
+            <strong>Your Schedule is Clear! 🗓️</strong><br>
+            No upcoming meetings or events scheduled for the next 14 days.
+          </div>
+          <button class="btn btn-primary-pill btn-sm" style="margin-top: 16px;" id="cal-schedule-quick-btn">
+            + Schedule a Meeting with Larvi
+          </button>
         </div>
-        <button class="btn btn-primary btn-sm" style="margin-top: 16px;" onclick="window.location.href=getLoginUrl(larviContext.sessionId)">
-          Connect Google Calendar
-        </button>
-      </div>
-    `;
+      `;
+      const btn = document.getElementById('cal-schedule-quick-btn');
+      if (btn) btn.onclick = () => {
+        switchView('chat');
+        window.sendQuickMessage('Schedule a meeting tomorrow');
+      };
+    }
     return;
   }
 
@@ -821,6 +998,12 @@ async function sendMessage(text) {
   currentAbortController = new AbortController();
   setSendButtonState(true);
 
+  const input = document.getElementById('chat-input');
+  if (input) {
+    input.value = '';
+    input.style.height = 'auto';
+  }
+
   if (activeViewName !== 'chat') {
     switchView('chat');
   }
@@ -969,7 +1152,10 @@ function setupVoiceInput() {
 // ── Welcome Chip Click ────────────────────────────────────────────────────────
 window.sendQuickMessage = function(text) {
   const input = document.getElementById('chat-input');
-  if (input) input.value = text;
+  if (input) {
+    input.value = '';
+    input.style.height = 'auto';
+  }
   sendMessage(text);
 };
 

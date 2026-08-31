@@ -64,8 +64,41 @@ def get_email_detail(message_id: str) -> dict:
         raise RuntimeError(f"Gmail API read error: {e}")
 
 
+from concurrent.futures import ThreadPoolExecutor
+
+
+def _fetch_message_summary(service, msg_id: str) -> Optional[dict]:
+    """Lightweight metadata fetch for high-speed inbox list rendering."""
+    try:
+        msg = (
+            service.users()
+            .messages()
+            .get(
+                userId="me",
+                id=msg_id,
+                format="metadata",
+                metadataHeaders=["Subject", "From", "To", "Date"],
+            )
+            .execute()
+        )
+        payload = msg.get("payload", {})
+        headers = {h["name"]: h["value"] for h in payload.get("headers", [])}
+        return {
+            "id": msg.get("id"),
+            "thread_id": msg.get("threadId"),
+            "subject": headers.get("Subject", "(No Subject)"),
+            "from": headers.get("From", "Unknown"),
+            "to": headers.get("To", ""),
+            "date": headers.get("Date", ""),
+            "snippet": msg.get("snippet", ""),
+            "body": msg.get("snippet", ""),
+        }
+    except Exception:
+        return None
+
+
 def list_recent_emails(count: int = 10) -> list[dict]:
-    """Fetch the N most recent emails from inbox."""
+    """Fetch the N most recent emails from inbox with high-speed parallel metadata retrieval."""
     service = _get_gmail_client()
     try:
         result = (
@@ -75,13 +108,16 @@ def list_recent_emails(count: int = 10) -> list[dict]:
             .execute()
         )
         messages = result.get("messages", [])
+        if not messages:
+            return []
+
         emails = []
-        for msg_ref in messages:
-            try:
-                detail = get_email_detail(msg_ref["id"])
-                emails.append(detail)
-            except Exception:
-                continue
+        with ThreadPoolExecutor(max_workers=min(len(messages), 8)) as executor:
+            futures = [executor.submit(_fetch_message_summary, service, m["id"]) for m in messages]
+            for f in futures:
+                res = f.result()
+                if res:
+                    emails.append(res)
         return emails
     except HttpError as e:
         raise RuntimeError(f"Gmail API list error: {e}")

@@ -54,7 +54,7 @@ class Settings:
     DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
 
     # ── CORS ──────────────────────────────────────────────────────────────
-    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://127.0.0.1:5500")
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:8000")
 
     # ── LLM Model ─────────────────────────────────────────────────────────
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
