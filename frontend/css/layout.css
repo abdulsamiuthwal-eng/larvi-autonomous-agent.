@@ -360,19 +360,23 @@
 }
 
 .sidebar-overlay {
-  display: none;
   position: fixed;
   inset: 0;
-  background: rgba(28, 25, 23, 0.4);
-  backdrop-filter: blur(2px);
-  z-index: 90;
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 190;
   opacity: 0;
-  transition: opacity var(--transition-base);
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, backdrop-filter;
 }
 
 .sidebar-overlay.active {
-  display: block;
   opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 /* ── Responsive Layouts (Tablets & Mobile) ───────────────────────── */
@@ -388,7 +392,24 @@
     grid-template-columns: var(--sidebar-left-width) 1fr 0px;
   }
   #sidebar-right {
-    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 340px;
+    max-width: 88vw;
+    z-index: 200;
+    transform: translate3d(100%, 0, 0);
+    visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -6px 0 32px rgba(0, 0, 0, 0.35);
+    will-change: transform;
+    display: flex !important;
+  }
+
+  #sidebar-right.mobile-open {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
   }
 }
 
@@ -408,6 +429,7 @@
     display: flex;
   }
 
+  /* Left Sidebar: Butter-Smooth Slide-in Drawer */
   #sidebar-left {
     position: fixed;
     top: 0;
@@ -416,17 +438,38 @@
     width: 290px;
     max-width: 85vw;
     z-index: 200;
-    transform: translateX(-100%);
-    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 0 32px rgba(0, 0, 0, 0.28);
+    transform: translate3d(-100%, 0, 0);
+    visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 6px 0 32px rgba(0, 0, 0, 0.35);
+    will-change: transform;
   }
 
   #sidebar-left.mobile-open {
-    transform: translateX(0);
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
   }
 
+  /* Right Sidebar (Context Dock): Butter-Smooth Slide-in Drawer */
   #sidebar-right {
-    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 340px;
+    max-width: 90vw;
+    z-index: 200;
+    transform: translate3d(100%, 0, 0);
+    visibility: hidden;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -6px 0 32px rgba(0, 0, 0, 0.35);
+    will-change: transform;
+    display: flex !important;
+  }
+
+  #sidebar-right.mobile-open {
+    transform: translate3d(0, 0, 0);
+    visibility: visible;
   }
 
   #main-panel {

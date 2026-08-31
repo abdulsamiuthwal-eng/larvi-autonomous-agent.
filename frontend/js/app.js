@@ -226,41 +226,73 @@ function setupEventListeners() {
     });
   }
 
-  // Mobile sidebar menu toggle
+  // Mobile & Desktop Sidebar Controls
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const sidebarLeft = document.getElementById('sidebar-left');
+  const sidebarRight = document.getElementById('sidebar-right');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const appShell = document.getElementById('app');
+  const brandLogo = document.getElementById('brand-logo');
+  const sidebarRightToggleBtn = document.getElementById('sidebar-right-toggle-btn');
+  const sidebarRightCloseBtn = document.getElementById('sidebar-right-close-btn');
 
-  const toggleMobileSidebar = (open) => {
+  const closeAllMobileSidebars = () => {
+    if (sidebarLeft) sidebarLeft.classList.remove('mobile-open');
+    if (sidebarRight) sidebarRight.classList.remove('mobile-open');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+  };
+
+  const toggleMobileLeftSidebar = (open) => {
     if (!sidebarLeft || !sidebarOverlay) return;
     const shouldOpen = open !== undefined ? open : !sidebarLeft.classList.contains('mobile-open');
     if (shouldOpen) {
+      if (sidebarRight) sidebarRight.classList.remove('mobile-open');
       sidebarLeft.classList.add('mobile-open');
       sidebarOverlay.classList.add('active');
     } else {
       sidebarLeft.classList.remove('mobile-open');
-      sidebarOverlay.classList.remove('active');
+      if (!sidebarRight || !sidebarRight.classList.contains('mobile-open')) {
+        sidebarOverlay.classList.remove('active');
+      }
+    }
+  };
+
+  const toggleMobileRightSidebar = (open) => {
+    if (!sidebarRight || !sidebarOverlay) return;
+    const shouldOpen = open !== undefined ? open : !sidebarRight.classList.contains('mobile-open');
+    if (shouldOpen) {
+      if (sidebarLeft) sidebarLeft.classList.remove('mobile-open');
+      sidebarRight.classList.add('mobile-open');
+      sidebarOverlay.classList.add('active');
+    } else {
+      sidebarRight.classList.remove('mobile-open');
+      if (!sidebarLeft || !sidebarLeft.classList.contains('mobile-open')) {
+        sidebarOverlay.classList.remove('active');
+      }
     }
   };
 
   if (mobileMenuBtn) {
-    mobileMenuBtn.addEventListener('click', () => toggleMobileSidebar());
-  }
-  if (sidebarOverlay) {
-    sidebarOverlay.addEventListener('click', () => toggleMobileSidebar(false));
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMobileLeftSidebar();
+    });
   }
 
-  // ── Collapsible Sidebars (Left Mini Icon-Only & Right Context Dock) ───────
-  const appShell = document.getElementById('app');
-  const brandLogo = document.getElementById('brand-logo');
-  const sidebarRightToggleBtn = document.getElementById('sidebar-right-toggle-btn');
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeAllMobileSidebars);
+  }
 
   if (brandLogo && appShell) {
     brandLogo.addEventListener('click', (e) => {
       e.stopPropagation();
-      appShell.classList.toggle('left-collapsed');
-      const isCollapsed = appShell.classList.contains('left-collapsed');
-      localStorage.setItem('larvi_left_collapsed', isCollapsed ? '1' : '0');
+      if (window.innerWidth <= 768) {
+        toggleMobileLeftSidebar();
+      } else {
+        appShell.classList.toggle('left-collapsed');
+        const isCollapsed = appShell.classList.contains('left-collapsed');
+        localStorage.setItem('larvi_left_collapsed', isCollapsed ? '1' : '0');
+      }
     });
     brandLogo.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -270,29 +302,50 @@ function setupEventListeners() {
     });
   }
 
-  const toggleRightSidebar = (e) => {
+  const handleRightToggle = (e) => {
     if (e) e.stopPropagation();
-    if (!appShell) return;
-    appShell.classList.toggle('right-collapsed');
-    const isCollapsed = appShell.classList.contains('right-collapsed');
-    localStorage.setItem('larvi_right_collapsed', isCollapsed ? '1' : '0');
+    if (window.innerWidth <= 1024) {
+      toggleMobileRightSidebar();
+    } else if (appShell) {
+      appShell.classList.toggle('right-collapsed');
+      const isCollapsed = appShell.classList.contains('right-collapsed');
+      localStorage.setItem('larvi_right_collapsed', isCollapsed ? '1' : '0');
+    }
   };
 
-  if (sidebarRightToggleBtn && appShell) {
-    sidebarRightToggleBtn.addEventListener('click', toggleRightSidebar);
+  if (sidebarRightToggleBtn) {
+    sidebarRightToggleBtn.addEventListener('click', handleRightToggle);
   }
 
-  const sidebarRightCloseBtn = document.getElementById('sidebar-right-close-btn');
   if (sidebarRightCloseBtn) {
-    sidebarRightCloseBtn.addEventListener('click', toggleRightSidebar);
+    sidebarRightCloseBtn.addEventListener('click', (e) => {
+      if (e) e.stopPropagation();
+      if (window.innerWidth <= 1024) {
+        toggleMobileRightSidebar(false);
+      } else if (appShell) {
+        appShell.classList.add('right-collapsed');
+        localStorage.setItem('larvi_right_collapsed', '1');
+      }
+    });
   }
 
-  // Restore user's previous collapse preference (defaults to open on first visit)
-  if (localStorage.getItem('larvi_left_collapsed') === '1' && appShell) {
-    appShell.classList.add('left-collapsed');
-  }
-  if (localStorage.getItem('larvi_right_collapsed') === '1' && appShell) {
-    appShell.classList.add('right-collapsed');
+  // Auto-close mobile left sidebar when any navigation item is clicked
+  document.querySelectorAll('#nav-list .nav-item, #sidebar-new-chat-btn').forEach(el => {
+    el.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        toggleMobileLeftSidebar(false);
+      }
+    });
+  });
+
+  // Restore user's previous collapse preference on desktop
+  if (window.innerWidth > 1024) {
+    if (localStorage.getItem('larvi_left_collapsed') === '1' && appShell) {
+      appShell.classList.add('left-collapsed');
+    }
+    if (localStorage.getItem('larvi_right_collapsed') === '1' && appShell) {
+      appShell.classList.add('right-collapsed');
+    }
   }
 
   // Modal Cancel & Confirm Listeners

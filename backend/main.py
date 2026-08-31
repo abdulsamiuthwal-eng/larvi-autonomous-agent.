@@ -15,6 +15,7 @@ if str(BACKEND_DIR) not in sys.path:
 import uuid
 import json
 import asyncio
+import contextvars
 from typing import Optional
 
 from fastapi import FastAPI, HTTPException, Request
@@ -266,11 +267,13 @@ async def chat_stream(request: ChatRequest):
         yield f"data: {json.dumps({'type': 'typing', 'session_id': session_id})}\n\n"
         await asyncio.sleep(0.1)
 
-        # Bind session_id to ContextVar for downstream tools & services
+        # Bind session_id to ContextVar and copy entire context into worker thread
         token = current_session_id.set(session_id)
+        ctx = contextvars.copy_context()
 
         try:
             result = await asyncio.to_thread(
+                ctx.run,
                 run_master_agent,
                 user_input=request.message,
                 session=session,
