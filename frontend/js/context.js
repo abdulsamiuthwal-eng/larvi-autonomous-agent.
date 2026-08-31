@@ -211,12 +211,34 @@ class LarviContext {
       upStatusDot.className = authData.authenticated ? 'up-status-dot online' : 'up-status-dot offline';
     }
 
+    const robotAvatarSvg = `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="robot-avatar-svg">
+      <line x1="12" y1="2" x2="12" y2="6"></line>
+      <circle cx="12" cy="2" r="1" fill="currentColor"></circle>
+      <rect x="4" y="6" width="16" height="14" rx="4" fill="rgba(255,255,255,0.18)"></rect>
+      <circle cx="9" cy="11.5" r="1.5" fill="#fff"></circle>
+      <circle cx="15" cy="11.5" r="1.5" fill="#fff"></circle>
+      <path d="M9 16h6"></path>
+      <rect x="2" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+      <rect x="20" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+    </svg>`;
+
+    const robotAvatarLargeSvg = `<svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="robot-avatar-svg">
+      <line x1="12" y1="2" x2="12" y2="6"></line>
+      <circle cx="12" cy="2" r="1" fill="currentColor"></circle>
+      <rect x="4" y="6" width="16" height="14" rx="4" fill="rgba(255,255,255,0.18)"></rect>
+      <circle cx="9" cy="11.5" r="1.5" fill="#fff"></circle>
+      <circle cx="15" cy="11.5" r="1.5" fill="#fff"></circle>
+      <path d="M9 16h6"></path>
+      <rect x="2" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+      <rect x="20" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+    </svg>`;
+
     if (effectivePicture && userPicEl) {
       userPicEl.src = effectivePicture;
       userPicEl.style.display = 'block';
       if (userAvatarEl) userAvatarEl.style.display = 'none';
     } else if (userAvatarEl) {
-      userAvatarEl.textContent = initial;
+      userAvatarEl.innerHTML = robotAvatarSvg;
       userAvatarEl.style.display = 'flex';
       if (userPicEl) userPicEl.style.display = 'none';
     }
@@ -230,7 +252,7 @@ class LarviContext {
       heroPicLarge.style.display = 'block';
       if (heroInitialLarge) heroInitialLarge.style.display = 'none';
     } else if (heroInitialLarge) {
-      heroInitialLarge.textContent = initial;
+      heroInitialLarge.innerHTML = robotAvatarLargeSvg;
       heroInitialLarge.style.display = 'flex';
       if (heroPicLarge) heroPicLarge.style.display = 'none';
     }

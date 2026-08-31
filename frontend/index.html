@@ -52,7 +52,7 @@
 
     <!-- Brand Header -->
     <div id="brand-header">
-      <div id="brand-logo" aria-hidden="true">
+      <div id="brand-logo" aria-hidden="false" role="button" tabindex="0" title="Click to collapse / expand sidebar">
         <!-- Larvi Icon -->
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 2L2 7l10 5 10-5-10-5z"/>
@@ -60,7 +60,7 @@
           <path d="M2 12l10 5 10-5"/>
         </svg>
       </div>
-      <div>
+      <div class="brand-text-wrap">
         <div id="brand-name">Larvi</div>
         <div id="brand-version">v1.0 Autonomous</div>
       </div>
@@ -71,7 +71,7 @@
       <div class="agent-status-hub-title">Agent Status</div>
 
       <!-- Master Agent -->
-      <div class="agent-status-item">
+      <div class="agent-status-item" title="Master Agent: Orchestrating workflows">
         <div class="agent-icon master">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="11" width="18" height="10" rx="2"></rect>
@@ -91,7 +91,7 @@
       </div>
 
       <!-- Email Agent -->
-      <div class="agent-status-item">
+      <div class="agent-status-item" title="Email Agent: Gmail OAuth">
         <div class="agent-icon email">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
@@ -108,7 +108,7 @@
       </div>
 
       <!-- Calendar Agent -->
-      <div class="agent-status-item">
+      <div class="agent-status-item" title="Calendar Agent: Google Calendar">
         <div class="agent-icon cal">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -130,34 +130,34 @@
     <!-- Navigation -->
     <nav>
       <ul id="nav-list" role="list">
-        <li class="nav-item active" id="nav-chat" role="listitem">
+        <li class="nav-item active" id="nav-chat" role="listitem" title="Chat &amp; Workflows">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
-          Chat &amp; Workflows
+          <span class="nav-text">Chat &amp; Workflows</span>
         </li>
-        <li class="nav-item" id="nav-inbox" role="listitem">
+        <li class="nav-item" id="nav-inbox" role="listitem" title="Mail Inbox">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/>
             <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>
           </svg>
-          Mail Inbox
+          <span class="nav-text">Mail Inbox</span>
         </li>
-        <li class="nav-item" id="nav-calendar" role="listitem">
+        <li class="nav-item" id="nav-calendar" role="listitem" title="Schedule &amp; Agenda">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
             <line x1="16" y1="2" x2="16" y2="6"/>
             <line x1="8" y1="2" x2="8" y2="6"/>
             <line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
-          Schedule
+          <span class="nav-text">Schedule</span>
         </li>
-        <li class="nav-item" id="nav-settings" role="listitem">
+        <li class="nav-item" id="nav-settings" role="listitem" title="Settings &amp; System">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="3"/>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
-          Settings
+          <span class="nav-text">Settings</span>
         </li>
       </ul>
     </nav>
@@ -183,7 +183,18 @@
     <div id="user-profile" title="View Profile">
       <div class="up-avatar-wrap">
         <img id="user-profile-pic" src="" alt="" style="display:none; width:34px;height:34px;border-radius:50%;object-fit:cover;">
-        <div id="user-avatar" aria-hidden="true">U</div>
+        <div id="user-avatar" aria-hidden="true" title="Larvi Agent Profile">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="robot-avatar-svg">
+            <line x1="12" y1="2" x2="12" y2="6"></line>
+            <circle cx="12" cy="2" r="1" fill="currentColor"></circle>
+            <rect x="4" y="6" width="16" height="14" rx="4" fill="rgba(255,255,255,0.18)"></rect>
+            <circle cx="9" cy="11.5" r="1.5" fill="#fff"></circle>
+            <circle cx="15" cy="11.5" r="1.5" fill="#fff"></circle>
+            <path d="M9 16h6"></path>
+            <rect x="2" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+            <rect x="20" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+          </svg>
+        </div>
         <span class="up-status-dot" id="up-status-dot"></span>
       </div>
       <div id="user-info">
@@ -212,23 +223,6 @@
        CENTER PANEL — Main Chat Interface
        ───────────────────────────────────────────────────────────── -->
   <main id="main-panel" role="main">
-
-    <!-- Auth Prompt Banner (hidden when connected) -->
-    <div id="auth-prompt" role="alert">
-      <div class="auth-prompt-text">
-        <span>⚠️</span>
-        <span><strong>Google account not connected.</strong> Connect to use email &amp; calendar features.</span>
-      </div>
-      <button id="connect-google-btn" class="btn-google-auth">
-        <svg class="google-auth-icon" viewBox="0 0 24 24" width="16" height="16">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        <span>Connect Google</span>
-      </button>
-    </div>
 
     <!-- Top Header Bar -->
     <header id="main-header">
@@ -260,6 +254,13 @@
             <line x1="12" y1="2" x2="12" y2="12"></line>
           </svg>
           <span class="btn-text">Disconnect Google</span>
+        </button>
+        <button id="sidebar-right-toggle-btn" class="btn btn-ghost btn-sm header-action-btn" title="Toggle Context Dock (collapse / expand)" aria-label="Toggle Context Dock">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="15" y1="3" x2="15" y2="21"></line>
+          </svg>
+          <span class="btn-text">Context</span>
         </button>
       </div>
     </header>
@@ -441,7 +442,18 @@
             <div class="profile-avatar-section">
               <div class="profile-avatar-large-wrap" id="profile-avatar-click-wrap" title="Click to upload new photo" style="cursor:pointer;">
                 <img id="profile-pic-large" src="" alt="" style="display:none;">
-                <div id="profile-initial-large" class="profile-initial-large">U</div>
+                <div id="profile-initial-large" class="profile-initial-large">
+                  <svg viewBox="0 0 24 24" width="38" height="38" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="robot-avatar-svg">
+                    <line x1="12" y1="2" x2="12" y2="6"></line>
+                    <circle cx="12" cy="2" r="1" fill="currentColor"></circle>
+                    <rect x="4" y="6" width="16" height="14" rx="4" fill="rgba(255,255,255,0.18)"></rect>
+                    <circle cx="9" cy="11.5" r="1.5" fill="#fff"></circle>
+                    <circle cx="15" cy="11.5" r="1.5" fill="#fff"></circle>
+                    <path d="M9 16h6"></path>
+                    <rect x="2" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+                    <rect x="20" y="10" width="2" height="6" rx="1" fill="currentColor"></rect>
+                  </svg>
+                </div>
                 <div class="profile-avatar-ring"></div>
                 <div class="profile-avatar-upload-overlay" title="Upload Photo">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
@@ -764,7 +776,6 @@
         <span class="mob-nav-label">Settings</span>
       </button>
     </nav>
-
   </main><!-- /main-panel -->
 
 
@@ -775,7 +786,15 @@
 
     <!-- Working Memory -->
     <section id="working-memory-panel" aria-labelledby="memory-label">
-      <div class="sidebar-section-label" id="memory-label">Live Working Memory</div>
+      <div class="sidebar-right-header-row">
+        <div class="sidebar-section-label" id="memory-label" style="margin-bottom:0;">Live Working Memory</div>
+        <button id="sidebar-right-close-btn" class="btn-sidebar-close" title="Hide Context Dock" aria-label="Hide Context Dock">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
       <div id="working-memory-content">
         <p class="memory-empty">No active context yet.</p>
       </div>

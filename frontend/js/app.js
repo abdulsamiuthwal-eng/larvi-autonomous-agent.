@@ -250,6 +250,51 @@ function setupEventListeners() {
     sidebarOverlay.addEventListener('click', () => toggleMobileSidebar(false));
   }
 
+  // ── Collapsible Sidebars (Left Mini Icon-Only & Right Context Dock) ───────
+  const appShell = document.getElementById('app');
+  const brandLogo = document.getElementById('brand-logo');
+  const sidebarRightToggleBtn = document.getElementById('sidebar-right-toggle-btn');
+
+  if (brandLogo && appShell) {
+    brandLogo.addEventListener('click', (e) => {
+      e.stopPropagation();
+      appShell.classList.toggle('left-collapsed');
+      const isCollapsed = appShell.classList.contains('left-collapsed');
+      localStorage.setItem('larvi_left_collapsed', isCollapsed ? '1' : '0');
+    });
+    brandLogo.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        brandLogo.click();
+      }
+    });
+  }
+
+  const toggleRightSidebar = (e) => {
+    if (e) e.stopPropagation();
+    if (!appShell) return;
+    appShell.classList.toggle('right-collapsed');
+    const isCollapsed = appShell.classList.contains('right-collapsed');
+    localStorage.setItem('larvi_right_collapsed', isCollapsed ? '1' : '0');
+  };
+
+  if (sidebarRightToggleBtn && appShell) {
+    sidebarRightToggleBtn.addEventListener('click', toggleRightSidebar);
+  }
+
+  const sidebarRightCloseBtn = document.getElementById('sidebar-right-close-btn');
+  if (sidebarRightCloseBtn) {
+    sidebarRightCloseBtn.addEventListener('click', toggleRightSidebar);
+  }
+
+  // Restore user's previous collapse preference (defaults to open on first visit)
+  if (localStorage.getItem('larvi_left_collapsed') === '1' && appShell) {
+    appShell.classList.add('left-collapsed');
+  }
+  if (localStorage.getItem('larvi_right_collapsed') === '1' && appShell) {
+    appShell.classList.add('right-collapsed');
+  }
+
   // Modal Cancel & Confirm Listeners
   const cancelBtn = document.getElementById('modal-cancel-btn');
   const confirmBtn = document.getElementById('modal-confirm-btn');

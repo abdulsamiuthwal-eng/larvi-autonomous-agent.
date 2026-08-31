@@ -600,3 +600,145 @@
   text-align: center;
 }
 
+/* ═══════════════════════════════════════════════════════════════════
+   COLLAPSIBLE SIDEBAR MODES (Left Mini Icon-Only & Right Dock)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Brand Logo Interactive Toggle ────────────────────────────── */
+#brand-logo {
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+#brand-logo:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(194, 65, 12, 0.42);
+}
+
+#brand-logo:active {
+  transform: scale(0.96);
+}
+
+.brand-text-wrap {
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+/* ── Left Sidebar Collapsed State ─────────────────────────────── */
+#app.left-collapsed #sidebar-left {
+  width: 68px;
+}
+
+#app.left-collapsed #brand-header {
+  justify-content: center;
+  padding: var(--space-4) 0;
+  gap: 0;
+}
+
+#app.left-collapsed .brand-text-wrap {
+  display: none;
+}
+
+#app.left-collapsed .agent-status-hub {
+  padding: var(--space-3) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#app.left-collapsed .agent-status-hub-title {
+  display: none;
+}
+
+#app.left-collapsed .agent-status-item {
+  justify-content: center;
+  padding: 6px 0;
+  width: 100%;
+}
+
+#app.left-collapsed .agent-status-info {
+  display: none;
+}
+
+#app.left-collapsed #nav-list {
+  padding: var(--space-2) 6px;
+  align-items: center;
+}
+
+#app.left-collapsed .nav-item {
+  justify-content: center;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  gap: 0;
+  position: relative;
+}
+
+#app.left-collapsed .nav-item .nav-text {
+  display: none;
+}
+
+#app.left-collapsed .nav-item svg {
+  width: 20px;
+  height: 20px;
+}
+
+#app.left-collapsed .nav-item.active::before {
+  left: -6px;
+  height: 22px;
+}
+
+#app.left-collapsed .chat-history-hub {
+  display: none;
+}
+
+#app.left-collapsed #user-profile {
+  justify-content: center;
+  padding: var(--space-3) 0;
+}
+
+#app.left-collapsed #user-info,
+#app.left-collapsed #sidebar-logout-btn,
+#app.left-collapsed #user-profile-btn {
+  display: none;
+}
+
+/* ── Right Dock Header Button Active State ─────────────────────── */
+#app.right-collapsed #sidebar-right-toggle-btn {
+  background: var(--color-surface-2);
+  color: var(--color-accent);
+  border: 1px solid var(--color-border-strong);
+}
+
+/* ── Right Sidebar Top Close Row ───────────────────────────────── */
+.sidebar-right-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.btn-sidebar-close {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.btn-sidebar-close:hover {
+  background: var(--color-rose-pale);
+  color: var(--color-rose);
+  border-color: var(--color-rose-border);
+  transform: scale(1.05);
+}
+

@@ -12,6 +12,15 @@
   width: 100vw;
   overflow: hidden;
   background: var(--color-canvas);
+  transition: grid-template-columns 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#app.left-collapsed {
+  --sidebar-left-width: 68px;
+}
+
+#app.right-collapsed {
+  --sidebar-right-width: 0px;
 }
 
 /* ── Left Sidebar ──────────────────────────────────────────────── */
@@ -23,6 +32,9 @@
   background: var(--color-surface);
   border-right: 1px solid var(--color-border);
   overflow: hidden;
+  width: var(--sidebar-left-width);
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: width;
 }
 
 /* ── Center Panel (Main) ───────────────────────────────────────── */
@@ -34,6 +46,7 @@
   background: var(--color-canvas);
   overflow: hidden;
   position: relative;
+  min-width: 0;
 }
 
 #main-header {
@@ -74,6 +87,16 @@
   background: var(--color-surface);
   border-left: 1px solid var(--color-border);
   overflow-y: auto;
+  width: var(--sidebar-right-width);
+  transition: width 0.32s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.22s ease, border-left-color 0.22s ease;
+  will-change: width, opacity;
+}
+
+#app.right-collapsed #sidebar-right {
+  opacity: 0;
+  pointer-events: none;
+  border-left-color: transparent;
+  overflow: hidden;
 }
 
 /* ── Sidebar Section Header ────────────────────────────────────── */
@@ -232,15 +255,27 @@
   width: 34px;
   height: 34px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--color-accent) 0%, #92400e 100%);
-  border: 2px solid var(--color-border);
+  background: linear-gradient(135deg, #ea580c 0%, #c2410c 60%, #9a3412 100%);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
   color: #fff;
-  letter-spacing: 0.01em;
+  box-shadow: 0 3px 10px rgba(194, 65, 12, 0.35), inset 0 1px 1.5px rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#user-avatar svg {
+  width: 19px;
+  height: 19px;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+}
+
+#user-avatar:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 14px rgba(194, 65, 12, 0.55);
 }
 
 .up-status-dot {
