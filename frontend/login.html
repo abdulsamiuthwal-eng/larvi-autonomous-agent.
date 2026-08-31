@@ -227,15 +227,18 @@
       align-items: center;
       justify-content: center;
       padding: clamp(24px, 4vh, 48px) clamp(28px, 5vw, 64px);
-      background: var(--dark-surface);
-      border-left: 1px solid var(--border);
+      background: transparent;
+      border-left: none;
       height: 100vh;
       overflow-y: auto;
+      position: relative;
     }
 
     .auth-card {
       width: 100%;
       max-width: 460px;
+      position: relative;
+      z-index: 2;
     }
 
     .auth-header {
