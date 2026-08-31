@@ -27,11 +27,11 @@ class Settings:
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")
     GOOGLE_REDIRECT_URI: str = os.getenv(
         "GOOGLE_REDIRECT_URI",
-        "https://larvi-ai-assistant.vercel.app/auth/callback"
+        "https://larvi-autonomous-agent.vercel.app/auth/callback"
     )
     FRONTEND_URL: str = os.getenv(
         "FRONTEND_URL",
-        "https://larvi-ai-assistant.vercel.app"
+        "https://larvi-autonomous-agent.vercel.app"
     )
 
     # Gmail + Calendar + UserInfo OAuth scopes

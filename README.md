@@ -15,7 +15,7 @@
 
 <br/>
 
-[![🚀 Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Visit%20Larvi%20Now-FF4500?style=for-the-badge&logoColor=white)](https://larvi-ai-assistant.vercel.app)
+[![🚀 Live Demo](https://img.shields.io/badge/🚀%20Live%20Demo-Visit%20Larvi%20Now-FF4500?style=for-the-badge&logoColor=white)](https://larvi-autonomous-agent.vercel.app)
 
 <br/>
 
@@ -391,6 +391,6 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 
 **Built with ❤️ using Google Gemini, LangGraph, FastAPI, and pure determination.**
 
-[![🚀 Try Larvi Live](https://img.shields.io/badge/🚀%20Try%20Larvi%20Live-larvi--ai--assistant.vercel.app-FF4500?style=for-the-badge)](https://larvi-ai-assistant.vercel.app)
+[![🚀 Try Larvi Live](https://img.shields.io/badge/🚀%20Try%20Larvi%20Live-larvi--autonomous--agent.vercel.app-FF4500?style=for-the-badge)](https://larvi-autonomous-agent.vercel.app)
 
 </div>
