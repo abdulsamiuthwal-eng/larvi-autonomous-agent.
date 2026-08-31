@@ -399,7 +399,9 @@ def run_master_agent(user_input: str, session: Session) -> dict:
     except Exception as e:
         err_str = str(e)
         if "429" in err_str or "quota" in err_str.lower() or "resourceexhausted" in err_str.lower():
-            friendly_msg = "⚠️ Google Gemini API temporary rate limit reached. Please wait 30–60 seconds and try again."
+            friendly_msg = "⚠️ Gemini API quota exhausted for today. Please try again tomorrow or add a new API key."
+        elif "404" in err_str or "no longer available" in err_str.lower() or "not found for api" in err_str.lower():
+            friendly_msg = "⚠️ Gemini API quota exhausted for today. Please try again tomorrow or add a new API key."
         else:
             friendly_msg = f"I encountered an issue while processing your request: {err_str}. Please try again."
 
