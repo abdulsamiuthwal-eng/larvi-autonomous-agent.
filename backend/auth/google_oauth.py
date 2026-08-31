@@ -22,6 +22,11 @@ else:
     TOKENS_DIR = BASE_DIR / "tokens"
 TOKENS_DIR.mkdir(exist_ok=True)
 
+# Global primary token — written on every successful OAuth login.
+# Any new session that has no per-session token falls back to this,
+# so users never see "Not Connected" just because they opened a New Chat.
+PRIMARY_TOKEN_PATH: Path = TOKENS_DIR / "primary.json"
+
 # In-memory credentials cache: session_id -> Credentials
 _session_credentials: dict[str, Credentials] = {}
 # In-memory user info cache: session_id -> dict(email, name, picture)
@@ -38,28 +43,46 @@ def _get_token_path(session_id: Optional[str] = None) -> Path:
 
 
 def save_credentials(creds: Credentials, session_id: Optional[str] = None) -> None:
-    """Persist credentials to token file and in-memory cache."""
+    """
+    Persist credentials to:
+      1. In-memory cache (session-specific)
+      2. Per-session token file  (tokens/<session_id>.json)
+      3. Global primary.json     (ALWAYS — so new chats inherit auth automatically)
+    """
     if session_id:
         _session_credentials[session_id] = creds
 
+    # Write per-session (or global legacy token.json)
     token_path = _get_token_path(session_id)
     with open(token_path, "w") as f:
         f.write(creds.to_json())
+
+    # Always mirror to primary.json so any future session finds it
+    with open(PRIMARY_TOKEN_PATH, "w") as f:
+        f.write(creds.to_json())
+    print(f"[Auth] Credentials saved — session: {session_id or 'global'}, primary.json updated ✅")
 
 
 def get_session_credentials(session_id: Optional[str] = None) -> Optional[Credentials]:
     """
     Retrieve valid Google OAuth credentials for a specific session.
-    Falls back to global token.json if no session token exists.
-    Auto-refreshes expired tokens.
+
+    Lookup chain (first match wins):
+      1. In-memory cache         — fastest, zero I/O
+      2. Per-session token file  — tokens/<session_id>.json
+      3. Global primary.json     — written on every successful login;
+                                   new chats automatically inherit auth ✅
+      4. Legacy global token.json — backward compatibility
+
+    Auto-refreshes expired tokens at any step.
     """
     creds = None
 
-    # 1. Check in-memory cache
+    # 1. In-memory cache
     if session_id and session_id in _session_credentials:
         creds = _session_credentials[session_id]
 
-    # 2. Check session token file
+    # 2. Per-session token file
     if creds is None and session_id:
         session_token_path = _get_token_path(session_id)
         if session_token_path.exists():
@@ -71,7 +94,20 @@ def get_session_credentials(session_id: Optional[str] = None) -> Optional[Creden
             except Exception as e:
                 print(f"[Auth] Error reading session token {session_id}: {e}")
 
-    # 3. Fallback to global token.json
+    # 3. Global primary.json — session-independent auth (the key fix)
+    if creds is None and PRIMARY_TOKEN_PATH.exists():
+        try:
+            creds = Credentials.from_authorized_user_file(
+                str(PRIMARY_TOKEN_PATH), settings.GOOGLE_SCOPES
+            )
+            # Cache under this session so subsequent calls are instant
+            if session_id:
+                _session_credentials[session_id] = creds
+            print(f"[Auth] Session '{session_id}' inherited auth from primary.json ✅")
+        except Exception as e:
+            print(f"[Auth] Error reading primary.json: {e}")
+
+    # 4. Legacy global token.json
     if creds is None:
         global_token_path = BASE_DIR / settings.GOOGLE_TOKEN_PATH
         if global_token_path.exists():
@@ -82,12 +118,12 @@ def get_session_credentials(session_id: Optional[str] = None) -> Optional[Creden
             except Exception as e:
                 print(f"[Auth] Error reading global token: {e}")
 
-    # 4. Auto-refresh if expired
+    # Auto-refresh if expired
     if creds and creds.expired and creds.refresh_token:
         try:
             creds.refresh(Request())
             save_credentials(creds, session_id)
-            print(f"[Auth] Token refreshed successfully for session: {session_id or 'global'}")
+            print(f"[Auth] Token refreshed for session: {session_id or 'global'}")
         except Exception as e:
             print(f"[Auth] Token refresh failed: {e}. Re-authentication required.")
             creds = None
