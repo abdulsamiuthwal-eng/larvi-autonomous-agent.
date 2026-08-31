@@ -14,14 +14,13 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
-# Production model cascade — fastest & highest-quota first.
-# gemini-2.5-flash is excluded: 404 for new API keys (per Google's own notice).
+# Production model cascade — only models confirmed working on new API keys.
+# Removed: gemini-2.5-flash (404), gemini-1.5-flash-8b (404)
 FALLBACK_CASCADE = [
-    "gemini-2.5-flash-lite",   # Primary: 1500 RPD free tier, lowest latency
+    "gemini-2.5-flash-lite",   # Primary: 1500 RPD free tier
     "gemini-2.0-flash",        # Fallback 1: v2 stable, widely available
     "gemini-1.5-flash",        # Fallback 2: proven v1 stable model
     "gemini-3.6-flash",        # Fallback 3: Google-recommended for new API keys
-    "gemini-1.5-flash-8b",     # Fallback 4: smallest/fastest emergency model
 ]
 
 # Remove duplicates while preserving order
