@@ -115,34 +115,38 @@ def is_authenticated(session_id: Optional[str] = None) -> bool:
 def create_web_flow(redirect_uri: str) -> Flow:
     """
     Create a Google OAuth Flow for web redirect URI.
-    Uses credentials.json if present (local dev), otherwise falls back to
-    GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET env vars (Vercel production).
+    Uses credentials.json if present, otherwise uses GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET.
     """
     credentials_path = BASE_DIR / settings.GOOGLE_CREDENTIALS_PATH
 
     if credentials_path.exists():
-        # Local development: load from file
-        return Flow.from_client_secrets_file(
-            str(credentials_path),
-            scopes=settings.GOOGLE_SCOPES,
-            redirect_uri=redirect_uri,
-        )
+        try:
+            with open(credentials_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if "web" in data or "installed" in data:
+                return Flow.from_client_config(
+                    data,
+                    scopes=settings.GOOGLE_SCOPES,
+                    redirect_uri=redirect_uri,
+                )
+        except Exception as e:
+            print(f"[Auth] Warning: Could not load {credentials_path}: {e}")
 
-    # Vercel / serverless: build config from environment variables
-    client_id     = settings.GOOGLE_CLIENT_ID
+    # Fallback to direct client_id and client_secret from settings
+    client_id = settings.GOOGLE_CLIENT_ID
     client_secret = settings.GOOGLE_CLIENT_SECRET
     if not client_id or not client_secret:
         raise EnvironmentError(
             "credentials.json not found and GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET "
-            "env vars are not set. Cannot start OAuth flow."
+            "are not configured. Cannot start OAuth flow."
         )
 
     client_config = {
         "web": {
-            "client_id":     client_id,
+            "client_id": client_id,
             "client_secret": client_secret,
-            "auth_uri":      "https://accounts.google.com/o/oauth2/auth",
-            "token_uri":     "https://oauth2.googleapis.com/token",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
             "redirect_uris": [redirect_uri],
         }
     }
@@ -151,6 +155,7 @@ def create_web_flow(redirect_uri: str) -> Flow:
         scopes=settings.GOOGLE_SCOPES,
         redirect_uri=redirect_uri,
     )
+
 
 
 def get_authorization_url(session_id: str, redirect_uri: str) -> tuple[str, str]:

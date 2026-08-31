@@ -48,23 +48,55 @@ You have access to the following tools:
 
 Tool names: {tool_names}
 
-Use the following format:
+Use the following EXACT format (do NOT use markdown bold like **Thought:** or **Action:**, write plain text):
 Question: the input question you must answer
-Thought: think about what to do
-Action: the tool name to use (must be one of [{tool_names}])
-Action Input: the input to the tool
-Observation: the result of the tool
-... (repeat Thought/Action/Observation as needed)
+Thought: you should always think about what to do
+Action: the tool name to use, exactly one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
-Final Answer: your comprehensive, helpful response to the user
+Final Answer: the final answer to the original input question
+
+CRITICAL FORMATTING INSTRUCTIONS:
+- Every Thought that uses a tool MUST immediately be followed by Action: and Action Input:
+- Do NOT output conversational text before Action: or Final Answer:
+- If no tool is needed, output:
+Thought: I now know the final answer
+Final Answer: your response to the user
 
 Begin!
 
 Question: {input}
-Thought: {agent_scratchpad}""")
+Thought:{agent_scratchpad}""")
 
 
 from agents.llm_factory import get_llm, invoke_llm_with_fallback
+
+
+def _custom_handle_parsing_errors(error) -> str:
+    err_str = str(error)
+    if "Could not parse LLM output:" in err_str:
+        raw = err_str.split("Could not parse LLM output:")[1].strip("` \n")
+        tool_names = ["list_emails", "read_email", "create_draft", "send_email",
+                      "reply_to_email", "search_emails"]
+        if any(t in raw for t in tool_names) or "Action:" in raw:
+            return (
+                "Invalid format. You must use this exact format:\n"
+                "Thought: <your reasoning>\n"
+                "Action: <tool_name>\n"
+                "Action Input: <input>\n"
+                "If you already completed the task, write:\n"
+                "Thought: I now know the final answer\n"
+                "Final Answer: <your response>"
+            )
+        if len(raw) > 20 and not raw.startswith("{"):
+            return f"Thought: I now know the final answer\nFinal Answer: {raw}"
+    return (
+        "Format error. Use one of these formats:\n"
+        "To use a tool: Thought/Action/Action Input\n"
+        "To finish: Thought: I now know the final answer\nFinal Answer: <response>"
+    )
 
 
 def run_email_agent(task: str, session: Session) -> dict:
@@ -73,8 +105,8 @@ def run_email_agent(task: str, session: Session) -> dict:
     
     Args:
         task: Natural language email task
-        session: Current user session with working memory
-    
+        session: Active session object with working memory
+
     Returns:
         dict with response, tool_calls, and updated working memory data
     """
@@ -93,8 +125,8 @@ def run_email_agent(task: str, session: Session) -> dict:
             agent=agent,
             tools=ALL_EMAIL_TOOLS,
             verbose=True,
-            max_iterations=8,
-            handle_parsing_errors=True,
+            max_iterations=6,
+            handle_parsing_errors=_custom_handle_parsing_errors,
             return_intermediate_steps=True,
         )
         return executor.invoke({
@@ -200,7 +232,8 @@ def _update_memory_from_steps(session: Session, intermediate_steps: list) -> Non
 
 
 def _check_needs_confirmation(response: str, tool_calls: list) -> bool:
-    """Detect if the agent is proposing a send/reply action that needs confirmation."""
-    destructive_tools = {"send_email", "reply_to_email"}
-    tools_used = {tc["tool"] for tc in tool_calls}
-    return bool(destructive_tools.intersection(tools_used))
+    """No email action requires a post-execution confirmation banner.
+    Email send/reply already executed before this is called — showing a banner
+    after-the-fact is misleading. Always return False.
+    """
+    return False

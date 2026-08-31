@@ -1121,6 +1121,41 @@ window.larviApp = {
     switchView('chat');
     window.sendQuickMessage(`Reschedule my meeting "${summary}" to a better time`);
   },
+  confirmAction: () => {
+    const banners = document.querySelectorAll('.confirmation-banner');
+    banners.forEach(b => {
+      b.style.transition = 'all 0.25s ease';
+      b.style.borderColor = 'var(--color-emerald-border)';
+      b.style.background = 'var(--color-emerald-pale)';
+      b.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;color:var(--color-emerald);font-weight:700;font-size:13px;padding:4px 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Action confirmed & executing...
+        </div>
+      `;
+    });
+    showToast('Action confirmed. Executing now...', 'success');
+    window.sendQuickMessage('Confirmed. Please proceed and execute this action.');
+  },
+  cancelConfirmation: () => {
+    const banners = document.querySelectorAll('.confirmation-banner');
+    banners.forEach(b => {
+      b.style.transition = 'all 0.25s ease';
+      b.style.opacity = '0.7';
+      b.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;color:var(--color-text-muted);font-size:12.5px;padding:4px 0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+          Action was cancelled by user.
+        </div>
+      `;
+    });
+    showToast('Action cancelled', 'info');
+  },
 };
 
 // ── UI Helpers ────────────────────────────────────────────────────────────────

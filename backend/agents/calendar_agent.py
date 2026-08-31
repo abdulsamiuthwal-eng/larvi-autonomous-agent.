@@ -27,21 +27,23 @@ Your capabilities:
 - Search events by keyword or topic
 - Check user availability (free/busy) for specific time slots
 - Create new calendar events (ALWAYS check availability first)
-- Update/reschedule existing events
 - Delete events (ONLY after user explicitly confirms)
 
-IMPORTANT SAFETY & DATE RULES:
-1. Today's live date is {current_datetime}. When the user says "today", "tomorrow", or "next week", ALWAYS calculate relative to this live date. Never use 2024 or outdated years.
-2. ALWAYS call check_availability before creating any new event.
-3. NEVER delete an event without explicit user confirmation.
-4. For rescheduling, always check the new slot's availability first.
-5. If a conflict is detected, inform the user and suggest alternatives.
-6. When creating events from email info, verify all details (date, time, title) before proceeding.
+STRICT WORKFLOW RULES — FOLLOW EXACTLY:
+1. Today's live date is {current_datetime}. ALWAYS calculate "today", "tomorrow", "next week" relative to this date.
+2. To schedule an event:
+   - Step 1: Call `check_availability` ONCE for the requested date and time.
+   - Step 2: Call `create_event` ONCE.
+   - Step 3: IMMEDIATELY output your Final Answer. Example: `Final Answer: I have scheduled your meeting on [Date] from [Start] to [End].`
+3. NEVER call `create_event` more than once! Once you see `✅ Event created`, you MUST stop and give your Final Answer.
+4. NEVER call `check_availability` more than once.
+5. NEVER delete an event without explicit user confirmation.
+6. For rescheduling, check new slot once then update immediately and provide Final Answer.
 
 DATE/TIME FORMAT:
 - Dates: YYYY-MM-DD (e.g., 2026-08-26)
-- Times: HH:MM in 24-hour format (e.g., 10:00 for 10 AM, 14:00 for 2 PM, 17:00 for 5 PM)
-- Tool Inputs: Pass standard primitive values (e.g., days_ahead=2 as number or string). Do not enclose simple parameters in JSON unless requested.
+- Times: HH:MM in 24-hour format (e.g., 10:00 for 10 AM, 13:00 for 1 PM, 14:00 for 2 PM)
+- Tool Inputs: Pass standard primitive values. Do not enclose simple parameters in JSON unless requested.
 
 Current working memory context:
 {working_memory}
@@ -54,32 +56,103 @@ You have access to the following tools:
 
 Tool names: {tool_names}
 
-Use the following format:
+Use the following EXACT format (do NOT use markdown bold like **Thought:** or **Action:**, write plain text):
 Question: the input question you must answer
-Thought: think about what to do
-Action: the tool name to use (must be one of [{tool_names}])
-Action Input: the input to the tool
-Observation: the result of the tool
-... (repeat Thought/Action/Observation as needed)
+Thought: you should always think about what to do
+Action: the tool name to use, exactly one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
-Final Answer: your comprehensive, helpful response to the user
+Final Answer: the final answer to the original input question
+
+CRITICAL FORMATTING INSTRUCTIONS:
+- Every Thought that uses a tool MUST immediately be followed by Action: and Action Input:
+- Once an event is created or tool finishes, immediately output:
+Thought: I now know the final answer
+Final Answer: your response to the user
 
 Begin!
 
 Question: {input}
-Thought: {agent_scratchpad}""")
+Thought:{agent_scratchpad}""")
 
 
 from agents.llm_factory import get_llm, invoke_llm_with_fallback
 
 
+def _custom_handle_parsing_errors(error) -> str:
+    err_str = str(error)
+    if "Could not parse LLM output:" in err_str:
+        raw = err_str.split("Could not parse LLM output:")[1].strip("` \n")
+        # If the raw text contains a tool name pattern like 'tool_name(' or 'Action:',
+        # it's a malformed tool call - tell agent to use correct format
+        tool_names = ["check_availability", "create_event", "update_event", "delete_event",
+                      "list_events", "search_events"]
+        if any(t in raw for t in tool_names) or "Action:" in raw:
+            return (
+                "Invalid format. You must use this exact format:\n"
+                "Thought: <your reasoning>\n"
+                "Action: <tool_name>\n"
+                "Action Input: <input>\n"
+                "If you already completed the task, write:\n"
+                "Thought: I now know the final answer\n"
+                "Final Answer: <your response>"
+            )
+        # Raw text looks like a natural language response — use as Final Answer
+        if len(raw) > 20 and not raw.startswith("{"):
+            return f"Thought: I now know the final answer\nFinal Answer: {raw}"
+    return (
+        "Format error. Use one of these formats:\n"
+        "To use a tool: Thought/Action/Action Input\n"
+        "To finish: Thought: I now know the final answer\nFinal Answer: <response>"
+    )
+
+
+def _build_fallback_response(intermediate_steps: list, original_task: str) -> str:
+    """Build a meaningful response from completed tool steps when agent hits iteration limit."""
+    import json as _json
+    created_events = []
+    for step in intermediate_steps:
+        if not isinstance(step, (list, tuple)) or len(step) < 2:
+            continue
+        action = step[0]
+        observation = step[1]
+        tool_name = getattr(action, "tool", "")
+        if tool_name == "create_event":
+            try:
+                obs_data = _json.loads(observation) if isinstance(observation, str) else {}
+                if obs_data.get("status") == "success":
+                    event = obs_data.get("event", {})
+                    created_events.append({
+                        "title": event.get("summary", "Event"),
+                        "date": event.get("start", {}).get("date") or event.get("start", {}).get("dateTime", "")[:10],
+                        "start": event.get("start", {}).get("dateTime", "")[11:16],
+                        "end": event.get("end", {}).get("dateTime", "")[11:16],
+                    })
+            except Exception:
+                pass
+
+    if created_events:
+        parts = []
+        for ev in created_events:
+            title = ev["title"]
+            date = ev["date"]
+            start = ev["start"]
+            end = ev["end"]
+            parts.append(f"✅ **{title}** on {date} from {start} to {end}")
+        return "I've successfully added the following to your calendar:\n" + "\n".join(parts)
+
+    return "I've processed your calendar request. Please check your Google Calendar to see the updates."
+
+
 def run_calendar_agent(task: str, session: Session) -> dict:
     """
     Run the Calendar Agent on a given task.
-
+    
     Args:
         task: Natural language calendar task
-        session: Current user session with working memory
+        session: Active session object with working memory
 
     Returns:
         dict with response, tool_calls, and updated working memory data
@@ -99,8 +172,9 @@ def run_calendar_agent(task: str, session: Session) -> dict:
             agent=agent,
             tools=ALL_CALENDAR_TOOLS,
             verbose=True,
-            max_iterations=10,
-            handle_parsing_errors=True,
+            max_iterations=5,
+            max_execution_time=45,
+            handle_parsing_errors=_custom_handle_parsing_errors,
             return_intermediate_steps=True,
         )
         return executor.invoke({
@@ -113,8 +187,12 @@ def run_calendar_agent(task: str, session: Session) -> dict:
     try:
         result = invoke_llm_with_fallback(_execute_agent)
 
-        response_text = result.get("output", "I couldn't process that calendar request.")
+        response_text = result.get("output", "")
         intermediate_steps = result.get("intermediate_steps", [])
+
+        # If agent stopped at iteration limit, build a helpful response from tool results
+        if not response_text or "agent stopped" in response_text.lower() or "iteration limit" in response_text.lower():
+            response_text = _build_fallback_response(intermediate_steps, task)
 
         tool_calls = _extract_tool_calls(intermediate_steps)
         _update_memory_from_steps(session, intermediate_steps)
@@ -204,6 +282,7 @@ def _update_memory_from_steps(session: Session, intermediate_steps: list) -> Non
 
 
 def _check_needs_confirmation(tool_calls: list) -> bool:
-    destructive_tools = {"delete_event", "create_event", "update_event"}
-    tools_used = {tc["tool"] for tc in tool_calls}
+    """Detect if the agent is proposing a destructive calendar action (e.g. deleting an event)."""
+    destructive_tools = {"delete_event"}
+    tools_used = {tc.get("tool") for tc in tool_calls if isinstance(tc, dict)}
     return bool(destructive_tools.intersection(tools_used))

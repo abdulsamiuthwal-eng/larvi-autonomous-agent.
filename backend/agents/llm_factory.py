@@ -9,14 +9,15 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
-# Cascade order prioritizing high-quota (1500 RPD free tier) and low-latency models
+# Confirmed available models prioritizing high-quota production tiers
 FALLBACK_CASCADE = [
-    "gemini-2.5-flash",
-    "gemini-2.5-flash-lite",
-    "gemini-2.0-flash",
-    "gemini-1.5-flash",
+    "gemini-2.5-flash-lite",   # high quota free tier (1500 RPD)
+    "gemini-flash-lite-latest",
+    "gemini-flash-latest",
+    "gemini-3.6-flash",
     "gemini-3.5-flash",
     "gemini-3.7-flash",
+    "gemini-3.1-flash-lite",
 ]
 # Remove duplicates while preserving order
 _SEEN = set()

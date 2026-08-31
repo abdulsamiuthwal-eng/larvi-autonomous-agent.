@@ -137,12 +137,11 @@ async def auth_login(session_id: Optional[str] = None, request: Request = None):
     Redirects the user's browser directly to the Google consent screen.
     """
     sid = session_id or str(uuid.uuid4())
-    # Use fixed redirect URI from env var if set (production/Vercel),
-    # otherwise derive from request (local dev)
-    if settings.GOOGLE_REDIRECT_URI and "localhost" not in settings.GOOGLE_REDIRECT_URI:
+    # Use explicit redirect_uri from settings, or normalize request base URL to localhost
+    if settings.GOOGLE_REDIRECT_URI:
         redirect_uri = settings.GOOGLE_REDIRECT_URI
     else:
-        base_url = str(request.base_url).rstrip("/")
+        base_url = str(request.base_url).rstrip("/").replace("127.0.0.1", "localhost")
         redirect_uri = f"{base_url}/auth/callback"
 
     try:
@@ -161,16 +160,17 @@ async def auth_callback(code: str, state: Optional[str] = None, request: Request
     """
     session_id = state or str(uuid.uuid4())
     # Must use the SAME redirect_uri as used during authorization
-    if settings.GOOGLE_REDIRECT_URI and "localhost" not in settings.GOOGLE_REDIRECT_URI:
+    if settings.GOOGLE_REDIRECT_URI:
         redirect_uri = settings.GOOGLE_REDIRECT_URI
     else:
-        base_url = str(request.base_url).rstrip("/")
+        base_url = str(request.base_url).rstrip("/").replace("127.0.0.1", "localhost")
         redirect_uri = f"{base_url}/auth/callback"
 
     try:
         exchange_code_for_credentials(code=code, redirect_uri=redirect_uri, session_id=session_id)
-        # Redirect back to frontend
-        frontend_url = f"{settings.FRONTEND_URL}/?auth=success&session_id={session_id}"
+        # Redirect directly to the app UI (not splash/login) with session_id
+        base_frontend = (settings.FRONTEND_URL or "http://localhost:5500").rstrip("/")
+        frontend_url = f"{base_frontend}/app?auth=success&session_id={session_id}"
         return RedirectResponse(url=frontend_url)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"OAuth callback failed: {str(e)}")
@@ -386,21 +386,27 @@ async def clear_session(session_id: str):
 @app.get("/emails/list")
 async def get_recent_emails_endpoint(session_id: Optional[str] = None):
     """Retrieve recent emails from Gmail for the inbox dashboard."""
+    token = current_session_id.set(session_id or "")
     try:
-        emails = list_recent_emails(max_results=10, session_id=session_id)
+        emails = list_recent_emails(count=15)
         return {"status": "success", "count": len(emails), "emails": emails}
     except Exception as e:
         return {"status": "error", "message": str(e), "emails": []}
+    finally:
+        current_session_id.reset(token)
 
 
 @app.get("/calendar/list")
 async def get_recent_events_endpoint(session_id: Optional[str] = None):
     """Retrieve upcoming calendar events for the schedule dashboard."""
+    token = current_session_id.set(session_id or "")
     try:
-        events = get_upcoming_events(days_ahead=7, session_id=session_id)
+        events = get_upcoming_events(days_ahead=14, max_results=25)
         return {"status": "success", "count": len(events), "events": events}
     except Exception as e:
         return {"status": "error", "message": str(e), "events": []}
+    finally:
+        current_session_id.reset(token)
 
 
 @app.get("/settings/stats")

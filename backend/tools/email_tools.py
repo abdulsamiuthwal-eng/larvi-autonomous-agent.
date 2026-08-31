@@ -114,17 +114,26 @@ def get_recent_emails(count: Union[int, str, Any] = 10) -> str:
 
 
 @tool
-def create_draft(to: str, subject: str, body: str) -> str:
+def create_draft(to: str, subject: str = "", body: str = "") -> str:
     """
     Create an email draft in Gmail (does NOT send it).
     Use when user asks to 'draft an email' or 'compose a message'.
     Args:
-        to: Recipient email address
+        to: Recipient email address (or a JSON string with all fields)
         subject: Email subject line
         body: Email body text
     Returns draft confirmation with draft ID.
     """
     try:
+        # Handle case where LLM passes all args as JSON string in `to`
+        if to and to.strip().startswith("{"):
+            try:
+                data = json.loads(to)
+                to = data.get("to", to)
+                subject = data.get("subject", subject)
+                body = data.get("body", body)
+            except Exception:
+                pass
         if not to or "@" not in to:
             return json.dumps({"status": "error", "message": "Invalid recipient email address."})
         result = create_draft_raw(to=to, subject=subject, body=body)
@@ -134,15 +143,24 @@ def create_draft(to: str, subject: str, body: str) -> str:
 
 
 @tool
-def send_email(to: str, subject: str, body: str) -> str:
+def send_email(to: str, subject: str = "", body: str = "") -> str:
     """
     Send an email via Gmail. This action is IRREVERSIBLE.
     Only call this tool after the user has explicitly confirmed they want to send.
     Args:
-        to: Recipient email address
+        to: Recipient email address (or a JSON string with all fields)
         subject: Email subject line
         body: Email body text
     """
+    # Handle case where LLM passes all args as JSON string in `to`
+    if to and to.strip().startswith("{"):
+        try:
+            data = json.loads(to)
+            to = data.get("to", to)
+            subject = data.get("subject", subject)
+            body = data.get("body", body)
+        except Exception:
+            pass
     try:
         if not to or "@" not in to:
             return json.dumps({"status": "error", "message": "Invalid recipient email address."})

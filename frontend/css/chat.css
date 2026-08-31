@@ -610,75 +610,251 @@
 /* ── Mobile Responsive Optimizations ─────────────────────────────── */
 @media (max-width: 768px) {
   .message-group {
-    gap: var(--space-2);
+    gap: 8px;
     max-width: 100% !important;
+    width: 100%;
+  }
+
+  .message-group.user {
+    max-width: 92% !important;
+    gap: 8px;
   }
 
   .msg-avatar {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px !important;
-    border-radius: var(--radius-sm) !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    border-radius: 9px !important;
+    margin-top: 3px !important;
   }
 
   .msg-avatar svg {
-    width: 14px !important;
-    height: 14px !important;
+    width: 15px !important;
+    height: 15px !important;
   }
 
   .user-bubble {
-    padding: var(--space-2) var(--space-3) !important;
-    font-size: 13.5px !important;
-    max-width: 92% !important;
-    border-radius: 14px 14px 2px 14px !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    max-width: 100% !important;
+    border-radius: 18px 18px 4px 18px !important;
+    word-break: break-word;
+    box-shadow: 0 2px 8px rgba(194, 65, 12, 0.18);
   }
 
   .larvi-card {
-    border-radius: 2px 14px 14px 14px !important;
+    border-radius: 4px 18px 18px 18px !important;
+    border: 1px solid var(--color-border) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+    overflow: hidden;
   }
 
   .larvi-card-header {
-    padding: 6px 10px !important;
-    gap: 6px !important;
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+
+  .agent-badge {
+    font-size: 11px !important;
+    padding: 2px 8px !important;
+  }
+
+  .larvi-card-time {
+    font-size: 10.5px !important;
   }
 
   .larvi-card-body {
-    padding: 10px 12px !important;
-    font-size: 13.5px !important;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
     line-height: 1.6 !important;
+    word-break: break-word;
   }
 
+  /* Email Widget on Mobile */
   .email-widget {
-    margin: 6px 0 !important;
-    padding: 10px !important;
+    margin: 8px 0 !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  .email-widget-header {
+    padding: 10px 12px !important;
+  }
+
+  .email-widget-subject {
+    padding: 4px 12px !important;
+    font-size: 13.5px !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
+
+  .email-widget-snippet {
+    padding: 0 12px 10px !important;
+    font-size: 12.5px !important;
+  }
+
+  /* Draft Widget on Mobile */
+  .draft-widget {
+    margin: 8px 0 !important;
+    border-radius: var(--radius-lg) !important;
+  }
+
+  .draft-widget-header {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+
+  .draft-row {
+    padding: 6px 12px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+
+  .draft-label {
+    font-size: 10.5px !important;
+  }
+
+  .draft-val {
+    font-size: 13px !important;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .draft-body-preview {
+    padding: 10px 12px !important;
+    margin: 8px 12px !important;
+    font-size: 13px !important;
+    word-break: break-word !important;
+  }
+
+  .draft-actions {
+    padding: 8px 12px 12px !important;
+    display: flex !important;
+    gap: 8px !important;
+  }
+
+  .draft-actions .btn {
+    flex: 1 !important;
+    padding: 8px 6px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    justify-content: center !important;
     border-radius: var(--radius-md) !important;
   }
 
-  .event-widget, .event-badge-card {
-    margin: 6px 0 !important;
-    padding: 10px !important;
+  /* ── Calendar Event Card Widget (Responsive Fixes) ──────────────── */
+  .event-widget {
+    margin: 8px 0 !important;
+    border-radius: var(--radius-lg) !important;
+    border: 1px solid var(--color-border) !important;
+  }
+
+  .event-widget-body {
+    padding: 12px !important;
+    gap: 12px !important;
+  }
+
+  .event-date-block {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 10px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .event-date-day {
+    font-size: 18px !important;
+  }
+
+  .event-date-mon {
+    font-size: 9px !important;
+  }
+
+  .event-title {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word !important;
+    line-height: 1.35 !important;
+  }
+
+  .event-time {
+    font-size: 12.5px !important;
+    margin-top: 3px !important;
+  }
+
+  .event-widget-footer {
+    padding: 10px 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    background: var(--color-surface) !important;
+  }
+
+  .event-widget-footer .badge {
+    align-self: flex-start !important;
+    font-size: 11px !important;
+    padding: 3px 8px !important;
+  }
+
+  .event-action-bar {
+    display: flex !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .event-action-bar .btn {
+    flex: 1 !important;
+    min-width: 0 !important;
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    justify-content: center !important;
     border-radius: var(--radius-md) !important;
+    text-align: center !important;
+    white-space: nowrap !important;
   }
 
-  .widget-actions, .card-actions {
-    flex-wrap: wrap !important;
-    gap: 6px !important;
+  /* Confirmation Banner on Mobile */
+  .confirmation-banner {
+    margin: 8px 0 !important;
+    padding: 12px !important;
+    border-radius: var(--radius-lg) !important;
   }
 
-  .tool-calls-section {
-    padding: 4px 10px !important;
-    gap: 4px !important;
+  .confirmation-banner-actions {
+    display: flex !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
+  }
+
+  .confirmation-banner-actions .btn {
+    flex: 1 !important;
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+    justify-content: center !important;
+  }
+
+  /* Tool Call Banner */
+  .tool-call-banner, .tool-calls-section {
+    margin: 6px 12px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    border-radius: var(--radius-md) !important;
   }
 
   .tool-call-pill {
-    padding: 2px 6px !important;
-    font-size: 10px !important;
+    padding: 3px 8px !important;
+    font-size: 10.5px !important;
   }
 
   pre {
-    padding: 8px !important;
-    font-size: 11px !important;
-    border-radius: var(--radius-sm) !important;
+    padding: 10px !important;
+    font-size: 11.5px !important;
+    border-radius: var(--radius-md) !important;
   }
 }
 

@@ -19,6 +19,9 @@ from services.gcal_service import (
 
 from typing import Any, Union
 
+# Module-level deduplication cache to prevent duplicate event creation within same agent run
+_CREATE_EVENT_CACHE: dict = {}
+
 
 def _try_unpack_json(val: Any) -> dict:
     """Helper to unpack LLM-stringified JSON argument dictionaries."""
@@ -104,7 +107,7 @@ def search_events(query: Union[str, Any]) -> str:
 def check_availability(date: str, start_time: str = "09:00", end_time: str = "17:00") -> str:
     """
     Check if the user is free during a specific time slot.
-    ALWAYS call this before creating a new event to detect conflicts.
+    ALWAYS call this ONCE before creating a new event to detect conflicts. Do NOT call it again.
     Args:
         date: Date in YYYY-MM-DD format (e.g., '2024-01-15')
         start_time: Start time in HH:MM 24-hour format (e.g., '14:00')
@@ -120,16 +123,22 @@ def check_availability(date: str, start_time: str = "09:00", end_time: str = "17
             end_time = unpacked.get("end_time", end_time)
 
         result = check_free_busy(date_str=date, start_time_str=start_time, end_time_str=end_time)
+        conflicts = result.get("conflicts", [])
+        n = len(conflicts)
         if result["free"]:
-            result["message"] = f"✅ You are free on {date} from {start_time} to {end_time}."
+            result["message"] = (
+                f"✅ AVAILABLE: You are free on {date} from {start_time} to {end_time}. "
+                f"No conflicts found. STOP checking availability — call create_event NOW."
+            )
         else:
             result["message"] = (
-                f"⚠️ Conflict detected on {date} from {start_time} to {end_time}. "
-                f"You have {len(result['conflicts'])} conflicting event(s)."
+                f"⚠️ CONFLICT: {n} conflicting event(s) on {date} from {start_time} to {end_time}. "
+                "Ask user if they want to proceed anyway or pick a different time."
             )
         return json.dumps({"status": "success", **result})
     except Exception as e:
         return json.dumps({"status": "error", "message": str(e)})
+
 
 
 @tool
@@ -143,8 +152,8 @@ def create_event(
 ) -> str:
     """
     Create a new event in Google Calendar.
-    IMPORTANT: Always check_availability first before calling this tool.
-    Only create after user confirmation for important meetings.
+    IMPORTANT: Call this ONCE only after check_availability confirms the slot is free.
+    Do NOT call this tool more than once per request — it will create duplicate events.
     Args:
         title: Event title/name
         date: Date in YYYY-MM-DD format
@@ -153,6 +162,8 @@ def create_event(
         description: Optional event description / agenda
         attendees: Comma-separated list of email addresses
     """
+    import time as _time
+
     try:
         unpacked = _try_unpack_json(title)
         if unpacked:
@@ -163,6 +174,17 @@ def create_event(
             description = unpacked.get("description", description)
             attendees = unpacked.get("attendees", attendees)
 
+        # Deduplication guard — prevent same event from being created twice in same agent run
+        dedup_key = f"{title}|{date}|{start_time}|{end_time}"
+        now = _time.time()
+        cached = _CREATE_EVENT_CACHE.get(dedup_key)
+        if cached and (now - cached["ts"]) < 60:
+            return json.dumps({
+                "status": "success",
+                "message": f"✅ Event '{title}' already created on {date} from {start_time} to {end_time}. Action is complete. Write your Final Answer now.",
+                "event": cached["event"],
+            })
+
         attendees_list = [a.strip() for a in attendees.split(",") if a.strip() and "@" in a] if attendees else []
         event = create_calendar_event(
             title=title,
@@ -172,13 +194,17 @@ def create_event(
             description=description,
             attendees=attendees_list,
         )
+
+        _CREATE_EVENT_CACHE[dedup_key] = {"event": event, "ts": now}
+
         return json.dumps({
             "status": "success",
-            "message": f"✅ Event '{title}' created on {date} from {start_time} to {end_time}.",
+            "message": f"✅ Event '{title}' created on {date} from {start_time} to {end_time}. Action is complete. Write your Final Answer now.",
             "event": event,
         })
     except Exception as e:
         return json.dumps({"status": "error", "message": str(e)})
+
 
 
 @tool
