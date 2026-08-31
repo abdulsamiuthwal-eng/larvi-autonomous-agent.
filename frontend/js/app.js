@@ -1249,6 +1249,11 @@ function setupVoiceInput() {
 
 // ── Welcome Chip Click ────────────────────────────────────────────────────────
 window.sendQuickMessage = function(text) {
+  // Block if agent is currently generating a response
+  if (isSending) {
+    showToast('⏳ Please wait for the current response to finish.', 'info');
+    return;
+  }
   const input = document.getElementById('chat-input');
   if (input) {
     input.value = '';
@@ -1447,6 +1452,7 @@ function setSendButtonState(isGenerating) {
   const btn = document.getElementById('send-btn');
   const sendIcon = document.getElementById('send-icon');
   const stopIcon = document.getElementById('stop-icon');
+  const chatInput = document.getElementById('chat-input');
   if (!btn) return;
 
   if (isGenerating) {
@@ -1456,6 +1462,11 @@ function setSendButtonState(isGenerating) {
     btn.setAttribute('aria-label', 'Stop response');
     if (sendIcon) sendIcon.style.display = 'none';
     if (stopIcon) stopIcon.style.display = 'block';
+    // Lock the input field during generation
+    if (chatInput) {
+      chatInput.disabled = true;
+      chatInput.placeholder = '⏳ Waiting for response...';
+    }
   } else {
     btn.classList.remove('stop-mode');
     btn.disabled = false;
@@ -1463,6 +1474,12 @@ function setSendButtonState(isGenerating) {
     btn.setAttribute('aria-label', 'Send message');
     if (sendIcon) sendIcon.style.display = 'block';
     if (stopIcon) stopIcon.style.display = 'none';
+    // Unlock the input field after response
+    if (chatInput) {
+      chatInput.disabled = false;
+      chatInput.placeholder = 'Ask Larvi to manage your emails or calendar...';
+      chatInput.focus();
+    }
   }
 }
 
