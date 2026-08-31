@@ -60,6 +60,11 @@ async function sendChatMessage(message, sessionId, callbacks = {}, signal = null
             onToken(event.token);
           } else if (event.type === 'final' && onFinal) {
             onFinal(event);
+          } else if (event.type === 'error') {
+            // Surface backend errors (quota exhausted, model unavailable, etc.)
+            const errMsg = event.message || 'An unexpected error occurred. Please try again.';
+            if (onError) onError(new Error(errMsg));
+            else console.error('[API] Agent error:', errMsg);
           }
         } catch (e) {
           // Skip malformed SSE events

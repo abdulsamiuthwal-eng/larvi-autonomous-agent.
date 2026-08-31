@@ -1135,7 +1135,7 @@ async function sendMessage(text) {
       },
       onError: (err) => {
         hideTyping();
-        renderErrorMessage(`Something went wrong: ${err.message}`);
+        renderErrorMessage(err.message);
         showToast(err.message, 'error');
       },
     }, currentAbortController.signal);
